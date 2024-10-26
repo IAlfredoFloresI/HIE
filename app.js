@@ -36,8 +36,9 @@ const swaggerOptions = {
             version: '1.0.0',
             description: 'API para manejar empleados',
             contact: {
-                name: 'Tu Nombre',
-                email: 'tu.email@example.com',
+                name: 'Eduardo Flores',
+                email: 'eduardoflores121298@gmail.com',
+                url: 'https://github.com/EduardoFlores117/HIE.git',
             },
         },
         servers: [
