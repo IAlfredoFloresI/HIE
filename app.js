@@ -10,7 +10,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware para CORS
-app.use(cors());
+const corsOptions = {
+    origin: ['http://localhost:4200'], // Orígenes permitidos
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Métodos permitidos
+    allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
+    credentials: true, // Permitir cookies (si es necesario)
+};
+
+app.use(cors(corsOptions));
+
 
 // Middleware para registrar las solicitudes
 app.use(morgan('combined'));
