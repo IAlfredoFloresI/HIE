@@ -1,0 +1,32 @@
+// modules/employees/models/employeeModel.js
+const db = require('../../config/database');
+
+// Crear tabla de empleados si no existe
+const createEmployeeTable = () => {
+    const query = `
+        CREATE TABLE IF NOT EXISTS employees (
+            id_employee INTEGER PRIMARY KEY AUTOINCREMENT,
+            employeeName TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            department TEXT NOT NULL,
+            phoneNumber TEXT,
+            address TEXT,
+            status TEXT DEFAULT 'activo'
+        )
+    `;
+
+    db.run(query, (err) => {
+        if (err) {
+            console.error('Error al crear la tabla de empleados:', err.message);
+        } else {
+            console.log('Tabla de empleados creada o ya existe.');
+        }
+    });
+};
+
+// Ejecutar la creación de la tabla al cargar el modelo
+createEmployeeTable();
+
+module.exports = {
+    createEmployeeTable
+};
