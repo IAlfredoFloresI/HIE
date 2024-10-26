@@ -43,7 +43,7 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: 'http://localhost:3000',
+                url: 'https://hie-3f29.onrender.com',
             },
         ],
     },
