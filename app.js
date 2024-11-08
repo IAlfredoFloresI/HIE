@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware para CORS
 const corsOptions = {
-    origin: ['http://localhost:4200', 'http://localhost:5500], // Orígenes permitidos
+    origin: ['http://localhost:4200', 'http://localhost:5500'], // Orígenes permitidos
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Métodos permitidos
     allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
     credentials: true, // Permitir cookies (si es necesario)
