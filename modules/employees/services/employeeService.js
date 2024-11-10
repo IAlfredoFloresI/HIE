@@ -1,13 +1,8 @@
 const employeeRepository = require('../repositories/employeeRepository');
 const removeAccents = require('remove-accents'); // Asegúrate de instalar este paquete
 
-// Obtener todos los empleados
-const getAllEmployees = async () => {
-    try {
-        return await employeeRepository.getAllEmployees();
-    } catch (error) {
-        throw new Error(`Error al obtener empleados: ${error.message}`);
-    }
+const getEmployeesWithPaginationAndFilters = async (query) => {
+    return await employeeRepository.getEmployeesWithPaginationAndFilters(query);
 };
 
 // Obtener un empleado por ID
@@ -81,33 +76,11 @@ const deleteEmployee = async (id) => {
 };
 
 
-// Buscar empleados por nombre desde el repository
-const searchByName = async (name) => {
-    if (!name) {
-        throw new Error('El nombre de búsqueda es obligatorio');
-    }
-
-    const employees = await employeeRepository.searchEmployeesByName(name);
-
-    if (employees.length === 0) {
-        throw new Error('Empleado no encontrado');
-    }
-
-    return employees;
-};
-
-const getEmployeesWithPaginationAndFilters = async (query) => {
-    return await employeeRepository.getEmployeesWithPaginationAndFilters(query);
-};
-
-
 module.exports = {
     getEmployeesWithPaginationAndFilters,
-    getAllEmployees,
     addEmployee,
     getEmployeeById,
     updateEmployee,
     deleteEmployee,
-    searchByName
 };
 
