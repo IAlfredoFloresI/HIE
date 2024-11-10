@@ -165,5 +165,45 @@ router.delete('/:id_employee', employeeController.deleteEmployee);
  */
 router.get('/search', employeeController.searchEmployeesByName);
 
+/**
+ * @swagger
+ * /api/employees:
+ *   get:
+ *     summary: Obtener empleados con paginación y filtros
+ *     tags: [Employees]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Número de página
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Número de empleados por página
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *         description: Estado del empleado (activo o baja)
+ *       - in: query
+ *         name: department
+ *         schema:
+ *           type: string
+ *         description: Departamento del empleado
+ *       - in: query
+ *         name: searchTerm
+ *         schema:
+ *           type: string
+ *         description: Búsqueda por nombre
+ *     responses:
+ *       200:
+ *         description: Lista de empleados filtrada
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/', employeeController.getEmployeesWithPaginationAndFilters);
+
 
 module.exports = router;
