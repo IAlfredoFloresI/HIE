@@ -4,7 +4,7 @@ const db = require(path.join(__dirname, '../../../db')); // Importar la función
 // Obtener todos los empleados
 const getAllEmployees = async () => {
     const database = await db.openDatabase();
-    const employees = await database.all('SELECT * FROM employees WHERE status = "activo"');
+    const employees = await database.all('SELECT * FROM employees');
     await database.close();
     return employees;
 };
