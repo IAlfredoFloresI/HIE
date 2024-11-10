@@ -23,12 +23,34 @@ const getEmployeeById = async (id) => {
     }
 };
 
-// Crear un nuevo empleado
+// Crear un nuevo empleado con validación de id_employee
 const addEmployee = async (employee) => {
     try {
-        return await employeeRepository.addEmployee(employee);
+        // Verificar que todos los campos requeridos tengan valores válidos
+        if (!employee.id_employee || !employee.employeeName || !employee.email || !employee.department) {
+            throw new Error("Error de validación: Faltan campos obligatorios (id_employee, employeeName, email o department).");
+        }
+
+        // Verificar si el ID ya existe, incluyendo empleados con status "baja"
+        const existingEmployee = await employeeRepository.getEmployeeById(employee.id_employee);
+        if (existingEmployee) {
+            throw new Error(`Error: El ID de empleado ${employee.id_employee} ya ha sido utilizado y no se puede reutilizar.`);
+        }
+
+        // Si no existe, procedemos a agregar el empleado
+        await employeeRepository.addEmployee(employee);
+        return { success: true, message: "Empleado agregado exitosamente." };
+
     } catch (error) {
-        throw new Error(`Error al crear empleado: ${error.message}`);
+        // Diferenciar el mensaje de error en función del tipo de fallo
+        if (error.message.includes("Error de validación")) {
+            return { success: false, error: error.message };  // Error de validación
+        }
+        if (error.message.includes("El ID de empleado")) {
+            return { success: false, error: error.message };  // Error por ID duplicado
+        }
+        // Si es otro error, probablemente es un problema de la base de datos
+        return { success: false, error: "Error de base de datos: " + error.message };
     }
 };
 

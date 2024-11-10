@@ -59,14 +59,15 @@ async function initializeDatabase() {
 
         // Intentamos crear la tabla si no existe
         await db.exec(`CREATE TABLE IF NOT EXISTS employees (
-            id_employee INTEGER PRIMARY KEY AUTOINCREMENT,
+            id_employee INTEGER PRIMARY KEY,
             employeeName TEXT NOT NULL,
             email TEXT NOT NULL,
             department TEXT NOT NULL,
             phoneNumber TEXT,
             address TEXT,
-            status TEXT CHECK(status IN ('activo', 'baja')) NOT NULL
-        )`);
+            status TEXT CHECK(status IN ('activo', 'baja')) NOT NULL,
+            deleted_at TEXT
+        )`);        
         console.log('Tabla "employees" verificada/existente.');
 
         // Verificar si la tabla ya tiene datos
