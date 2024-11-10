@@ -2,25 +2,50 @@ const path = require('path');
 const db = require(path.join(__dirname, '../../../db')); // Importar la función para abrir la base de datos
 const removeAccents = require('remove-accents'); // Asegúrate de tener esta librería
 
-const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10 }) => {
+// Obtener empleados con paginación y filtros
+const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10, status, department, searchTerm }) => {
     const database = await db.openDatabase();
 
-    try {
-        // Calculamos el offset para la paginación
-        const offset = (page - 1) * limit;
+    // Convertimos page y limit a enteros para asegurarnos de que tienen un valor
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 10;
 
-        // Consulta con solo la paginación
-        const employees = await database.all(`SELECT * FROM employees LIMIT ? OFFSET ?`, [limit, offset]);
+    const offset = (page - 1) * limit;
+    
+    // Construimos la consulta base
+    let query = `SELECT * FROM employees WHERE 1=1`;
+    const params = [];
 
-        await database.close();
-        return employees;
-    } catch (error) {
-        await database.close();
-        console.error("Error en la consulta con paginación:", error.message);
-        throw new Error(`Error en la consulta con paginación: ${error.message}`);
+    // Filtro de estado
+    if (status) {
+        query += ` AND status = ?`;
+        params.push(status);
     }
-};
 
+    // Filtro de departamento
+    if (department) {
+        query += ` AND department = ?`;
+        params.push(department);
+    }
+
+    // Paginación
+    query += ` LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
+
+    // Ejecutar la consulta
+    const employees = await database.all(query, params);
+    await database.close();
+
+    // Aplicar filtro de búsqueda en JavaScript
+    if (searchTerm) {
+        const normalizedSearchTerm = removeAccents(searchTerm.toLowerCase());
+        return employees.filter(employee =>
+            removeAccents(employee.employeeName.toLowerCase()).includes(normalizedSearchTerm)
+        );
+    }
+
+    return employees;
+};
 
 // Obtener un empleado por ID
 const getEmployeeById = async (id) => {
