@@ -1,9 +1,16 @@
 const employeeService = require('../services/employeeService');
 
-// Obtener todos los empleados
-const getAllEmployees = async (req, res) => {
+// Obtener empleados con paginación y filtros
+const getEmployeesWithPaginationAndFilters = async (req, res) => {
     try {
-        const employees = await employeeService.getAllEmployees();
+        const { page, limit, status, department, searchTerm } = req.query;
+        const employees = await employeeService.getEmployeesWithPaginationAndFilters({
+            page: parseInt(page),
+            limit: parseInt(limit),
+            status,
+            department,
+            searchTerm,
+        });
         res.status(200).json(employees);
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener empleados: ' + error.message });
@@ -46,7 +53,7 @@ const updateEmployee = async (req, res) => {
     }
 };
 
-// Eliminar un empleado
+// Eliminar un empleado (cambiar su estado a baja)
 const deleteEmployee = async (req, res) => {
     try {
         const result = await employeeService.deleteEmployee(req.params.id_employee);
@@ -59,44 +66,10 @@ const deleteEmployee = async (req, res) => {
     }
 };
 
-const searchEmployeesByName = async (req, res) => {
-    try {
-        const { name } = req.query;
-
-        if (!name) {
-            return res.status(400).json({ message: 'El parámetro "name" es requerido' });
-        }
-
-        const employees = await employeeService.searchByName(name);
-        res.status(200).json(employees);
-    } catch (error) {
-        res.status(404).json({ message: 'Empleado no encontrado: ' + error.message });
-    }
-};
-
-// Obtener empleados con paginación y filtros
-const getEmployeesWithPaginationAndFilters = async (req, res) => {
-    try {
-        const { page, limit, status, department, searchTerm } = req.query;
-        const employees = await employeeService.getEmployeesWithPaginationAndFilters({
-            page: parseInt(page),
-            limit: parseInt(limit),
-            status,
-            department,
-            searchTerm,
-        });
-        res.status(200).json(employees);
-    } catch (error) {
-        res.status(500).json({ message: 'Error al obtener empleados: ' + error.message });
-    }
-};
-
 module.exports = {
     getEmployeesWithPaginationAndFilters,
-    getAllEmployees,
     createEmployee,
     getEmployeeById,
     updateEmployee,
-    deleteEmployee,
-    searchEmployeesByName
+    deleteEmployee
 };

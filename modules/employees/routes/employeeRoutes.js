@@ -12,20 +12,6 @@ const employeeController = require('../controllers/employeeController');
 /**
  * @swagger
  * /api/employees:
- *   get:
- *     summary: Obtener todos los empleados
- *     tags: [Employees]
- *     responses:
- *       200:
- *         description: Lista de empleados
- *       500:
- *         description: Error interno del servidor
- */
-router.get('/', employeeController.getAllEmployees);
-
-/**
- * @swagger
- * /api/employees:
  *   post:
  *     summary: Agregar un nuevo empleado
  *     tags: [Employees]
@@ -143,27 +129,6 @@ router.put('/:id_employee', employeeController.updateEmployee);
  *         description: Empleado no encontrado
  */
 router.delete('/:id_employee', employeeController.deleteEmployee);
-
-/**
- * @swagger
- * /api/employees/search:
- *   get:
- *     summary: Buscar empleados por nombre
- *     tags: [Employees]
- *     parameters:
- *       - name: name
- *         in: query
- *         required: true
- *         description: Nombre o parte del nombre del empleado a buscar
- *         schema:
- *           type: string
- *     responses:
- *       200:
- *         description: Lista de empleados coincidentes
- *       500:
- *         description: Error interno del servidor
- */
-router.get('/search', employeeController.searchEmployeesByName);
 
 /**
  * @swagger
