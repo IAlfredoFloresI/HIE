@@ -4,7 +4,7 @@ const db = require(path.join(__dirname, '../../../db')); // Importar la función
 // Obtener todos los empleados
 const getAllEmployees = async () => {
     const database = await db.openDatabase();
-    const employees = await database.all('SELECT * FROM employees');
+    const employees = await database.all('SELECT * FROM employees WHERE status = "baja"');
     await database.close();
     return employees;
 };
@@ -41,12 +41,18 @@ const updateEmployee = async (id, employee) => {
     return result.changes > 0 ? { id_employee: id, ...employee } : null;
 };
 
-// Eliminar un empleado
+// Eliminar (desactivar) un empleado
 const deleteEmployee = async (id) => {
     const database = await db.openDatabase();
-    const result = await database.run('DELETE FROM employees WHERE id_employee = ?', [id]);
+    const deletedAt = new Date().toISOString(); // Fecha y hora actual en formato ISO
+
+    const result = await database.run(
+        `UPDATE employees SET status = 'baja', deleted_at = ? WHERE id_employee = ?`,
+        [deletedAt, id]
+    );
+
     await database.close();
-    return result.changes > 0;
+    return result.changes > 0; // Devuelve true si se actualizó un registro
 };
 
 // Buscar empleados por nombre en la base de datos
@@ -62,6 +68,17 @@ const searchEmployeesByName = async (name) => {
     await database.close();
     return employees;
 };
+
+const checkEmployeeIdExists = async (id_employee) => {
+    const database = await db.openDatabase();
+    const employee = await database.get(
+        'SELECT * FROM employees WHERE id_employee = ?',
+        id_employee
+    );
+    await database.close();
+    return employee !== undefined;
+};
+
 
 module.exports = {
     getAllEmployees,
