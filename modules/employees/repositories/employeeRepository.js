@@ -1,6 +1,7 @@
 const path = require('path');
 const db = require(path.join(__dirname, '../../../db')); // Importar la función para abrir la base de datos
 const removeAccents = require('remove-accents'); // Asegúrate de tener esta librería
+const bcrypt = require('bcrypt');
 
 // Obtener empleados con paginación y filtros
 const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10, status, department, searchTerm }) => {
@@ -11,7 +12,7 @@ const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10, stat
     limit = parseInt(limit) || 10;
 
     const offset = (page - 1) * limit;
-    
+
     // Construimos la consulta base
     let query = `SELECT * FROM employees WHERE 1=1`;
     const params = [];
@@ -58,10 +59,11 @@ const getEmployeeById = async (id) => {
 // Crear un nuevo empleado
 const addEmployee = async (employee) => {
     const { employeeName, email, department, phoneNumber, address, status } = employee;
+    const passwordHash = await bcrypt.hash(employee.password, 10);
     const database = await db.openDatabase();
     const result = await database.run(
-        `INSERT INTO employees (employeeName, email, department, phoneNumber, address, status) VALUES (?, ?, ?, ?, ?, ?)`,
-        [employeeName, email, department, phoneNumber, address, status]
+        `INSERT INTO employees (employeeName, email, department, phoneNumber, address, status, password) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        [employeeName, email, department, phoneNumber, address, status, passwordHash]
     );
     await database.close();
     return { id_employee: result.lastID, ...employee };
@@ -103,8 +105,20 @@ const checkEmployeeIdExists = async (id_employee) => {
     return employee !== undefined;
 };
 
+// Función para obtener un empleado por email
+const getEmployeeByEmail = async (email) => {
+    const database = await db.openDatabase();
+    const employee = await database.get(
+        'SELECT * FROM employees WHERE email = ?',
+        email
+    );
+    await database.close();
+    return employee;
+};
+
 module.exports = {
     getEmployeesWithPaginationAndFilters,
+    getEmployeeByEmail,
     getEmployeeById,
     addEmployee,
     updateEmployee,

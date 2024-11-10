@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const swaggerJsDoc = require('swagger-jsdoc');
@@ -5,13 +6,14 @@ const swaggerUi = require('swagger-ui-express');
 const employeeRoutes = require('./modules/employees/routes/employeeRoutes'); // Rutas de empleados
 const cors = require('cors');
 const morgan = require('morgan');
+const authRouter = require('./modules/auth/authRouter');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware para CORS
 const corsOptions = {
-    origin: ['http://localhost:4200', 'http://localhost:5500'], // Orígenes permitidos
+    origin: ['http://localhost:00', 'http://localhost:5500'], // Orígenes permitidos
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Métodos permitidos
     allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
     credentials: true, // Permitir cookies (si es necesario)
@@ -26,6 +28,9 @@ app.use(morgan('combined'));
 // Middleware para parsear JSON y formularios
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Ruta base para autenticación
+app.use('/auth', authRouter);
 
 // Configuración de Swagger
 const swaggerOptions = {
@@ -44,10 +49,15 @@ const swaggerOptions = {
         servers: [
             {
                 url: 'https://hie-3f29.onrender.com',
+                description: 'Servidor de producción'
             },
+            {
+                url: 'http://localhost:3000',
+                description: 'Servidor local'
+            }
         ],
     },
-    apis: ['./modules/employees/routes/*.js'], // Rutas a los archivos de Swagger
+    apis: ['./modules/employees/routes/*.js', './modules/auth/authRouter.js'], // Rutas a los archivos de Swagger
 };
 
 // Generación de la documentación Swagger
