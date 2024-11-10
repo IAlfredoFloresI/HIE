@@ -1,5 +1,6 @@
 const path = require('path');
 const db = require(path.join(__dirname, '../../../db')); // Importar la función para abrir la base de datos
+const removeAccents = require('remove-accents'); // Asegúrate de tener esta librería
 
 // Obtener empleados con paginación y filtros
 const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10, status, department, searchTerm }) => {
@@ -8,36 +9,38 @@ const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10, stat
     // Calculamos el offset para la paginación
     const offset = (page - 1) * limit;
 
-    // Construimos la consulta con filtros dinámicos
+    // Construimos la consulta base
     let query = `SELECT * FROM employees WHERE 1=1`;
     const params = [];
 
-    // Agregar filtro de estado si se proporciona
+    // Filtro de estado
     if (status) {
         query += ` AND status = ?`;
         params.push(status);
     }
 
-    // Agregar filtro de departamento si se proporciona
+    // Filtro de departamento
     if (department) {
         query += ` AND department = ?`;
         params.push(department);
     }
 
-    // Agregar filtro de búsqueda si se proporciona
-    if (searchTerm) {
-        query += ` AND LOWER(employeeName) LIKE ?`;
-        params.push(`%${searchTerm.toLowerCase()}%`);
-    }
-
-    // Agregar paginación
+    // Paginación
     query += ` LIMIT ? OFFSET ?`;
     params.push(limit, offset);
 
-    // Ejecutamos la consulta
+    // Ejecutar la consulta
     const employees = await database.all(query, params);
-
     await database.close();
+
+    // Aplicar filtro de búsqueda en JavaScript
+    if (searchTerm) {
+        const normalizedSearchTerm = removeAccents(searchTerm.toLowerCase());
+        return employees.filter(employee =>
+            removeAccents(employee.employeeName.toLowerCase()).includes(normalizedSearchTerm)
+        );
+    }
+
     return employees;
 };
 
