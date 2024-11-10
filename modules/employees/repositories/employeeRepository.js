@@ -2,19 +2,22 @@ const path = require('path');
 const db = require(path.join(__dirname, '../../../db')); // Importar la función para abrir la base de datos
 const removeAccents = require('remove-accents'); // Asegúrate de tener esta librería
 
-// Obtener empleados con paginación y filtros
-const getEmployeesWithPaginationAndFilters = async () => {
+const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10 }) => {
     const database = await db.openDatabase();
 
     try {
-        // Consulta simple sin filtros ni paginación
-        const employees = await database.all(`SELECT * FROM employees`);
+        // Calculamos el offset para la paginación
+        const offset = (page - 1) * limit;
+
+        // Consulta con solo la paginación
+        const employees = await database.all(`SELECT * FROM employees LIMIT ? OFFSET ?`, [limit, offset]);
+
         await database.close();
         return employees;
     } catch (error) {
         await database.close();
-        console.error("Error en la consulta básica:", error.message);
-        throw new Error(`Error en la consulta: ${error.message}`);
+        console.error("Error en la consulta con paginación:", error.message);
+        throw new Error(`Error en la consulta con paginación: ${error.message}`);
     }
 };
 
