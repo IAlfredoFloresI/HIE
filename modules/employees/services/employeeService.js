@@ -96,7 +96,13 @@ const searchByName = async (name) => {
     return employees;
 };
 
+const getEmployeesWithPaginationAndFilters = async (query) => {
+    return await employeeRepository.getEmployeesWithPaginationAndFilters(query);
+};
+
+
 module.exports = {
+    getEmployeesWithPaginationAndFilters,
     getAllEmployees,
     addEmployee,
     getEmployeeById,

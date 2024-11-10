@@ -74,7 +74,25 @@ const searchEmployeesByName = async (req, res) => {
     }
 };
 
+// Obtener empleados con paginación y filtros
+const getEmployeesWithPaginationAndFilters = async (req, res) => {
+    try {
+        const { page, limit, status, department, searchTerm } = req.query;
+        const employees = await employeeService.getEmployeesWithPaginationAndFilters({
+            page: parseInt(page),
+            limit: parseInt(limit),
+            status,
+            department,
+            searchTerm,
+        });
+        res.status(200).json(employees);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener empleados: ' + error.message });
+    }
+};
+
 module.exports = {
+    getEmployeesWithPaginationAndFilters,
     getAllEmployees,
     createEmployee,
     getEmployeeById,

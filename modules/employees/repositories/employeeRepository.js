@@ -4,7 +4,7 @@ const db = require(path.join(__dirname, '../../../db')); // Importar la función
 // Obtener todos los empleados
 const getAllEmployees = async () => {
     const database = await db.openDatabase();
-    const employees = await database.all('SELECT * FROM employees WHERE status = "baja"');
+    const employees = await database.all('SELECT * FROM employees WHERE status = "activo"');
     await database.close();
     return employees;
 };
@@ -78,9 +78,48 @@ const checkEmployeeIdExists = async (id_employee) => {
     await database.close();
     return employee !== undefined;
 };
+// Obtener empleados con paginación y filtros
+const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10, status, department, searchTerm }) => {
+    const database = await db.openDatabase();
 
+    // Calculamos el offset para la paginación
+    const offset = (page - 1) * limit;
+
+    // Construimos la consulta con filtros dinámicos
+    let query = `SELECT * FROM employees WHERE 1=1`;
+    const params = [];
+
+    // Agregar filtro de estado si se proporciona
+    if (status) {
+        query += ` AND status = ?`;
+        params.push(status);
+    }
+
+    // Agregar filtro de departamento si se proporciona
+    if (department) {
+        query += ` AND department = ?`;
+        params.push(department);
+    }
+
+    // Agregar filtro de búsqueda si se proporciona
+    if (searchTerm) {
+        query += ` AND LOWER(employeeName) LIKE ?`;
+        params.push(`%${searchTerm.toLowerCase()}%`);
+    }
+
+    // Agregar paginación
+    query += ` LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
+
+    // Ejecutamos la consulta
+    const employees = await database.all(query, params);
+
+    await database.close();
+    return employees;
+};
 
 module.exports = {
+    getEmployeesWithPaginationAndFilters,
     getAllEmployees,
     getEmployeeById,
     addEmployee,
