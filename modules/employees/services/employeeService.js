@@ -1,5 +1,6 @@
 const employeeRepository = require('../repositories/employeeRepository');
-const removeAccents = require('remove-accents'); // Asegúrate de instalar este paquete
+const removeAccents = require('remove-accents');
+const bcrypt = require('bcrypt');
 
 const getEmployeesWithPaginationAndFilters = async (query) => {
     return await employeeRepository.getEmployeesWithPaginationAndFilters(query);
@@ -18,7 +19,7 @@ const getEmployeeById = async (id) => {
     }
 };
 
-// Crear un nuevo empleado con validación de id_employee
+// Crear un nuevo empleado con validación de ID único
 const addEmployee = async (employee) => {
     try {
         // Verificar que todos los campos requeridos tengan valores válidos
@@ -32,7 +33,15 @@ const addEmployee = async (employee) => {
             throw new Error(`Error: El ID de empleado ${employee.id_employee} ya ha sido utilizado y no se puede reutilizar.`);
         }
 
-        // Si no existe, procedemos a agregar el empleado
+        // Asignar el rol "Employee" por defecto si no se proporciona uno
+        employee.role = employee.role || "Employee";
+
+        // Cifrar la contraseña antes de guardar
+        if (employee.password) {
+            employee.password = await bcrypt.hash(employee.password, 10);
+        }
+
+        // Agregar el empleado a la base de datos
         await employeeRepository.addEmployee(employee);
         return { success: true, message: "Empleado agregado exitosamente." };
 
@@ -75,7 +84,6 @@ const deleteEmployee = async (id) => {
     }
 };
 
-
 module.exports = {
     getEmployeesWithPaginationAndFilters,
     addEmployee,
@@ -83,4 +91,3 @@ module.exports = {
     updateEmployee,
     deleteEmployee,
 };
-
