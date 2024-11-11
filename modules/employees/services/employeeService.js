@@ -33,6 +33,9 @@ const addEmployee = async (employee) => {
             throw new Error(`Error: El ID de empleado ${employee.id_employee} ya ha sido utilizado y no se puede reutilizar.`);
         }
 
+        // Asignar el rol "Employee" por defecto si no se proporciona uno
+        employee.role = employee.role || "Employee";
+
         // Cifrar la contraseña antes de guardar
         if (employee.password) {
             employee.password = await bcrypt.hash(employee.password, 10);

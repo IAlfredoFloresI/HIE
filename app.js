@@ -3,24 +3,23 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-const employeeRoutes = require('./modules/employees/routes/employeeRoutes'); // Rutas de empleados
 const cors = require('cors');
 const morgan = require('morgan');
-const authRouter = require('./modules/auth/authRouter');
+
+const employeeRoutes = require('./modules/employees/routes/employeeRoutes'); // Rutas de empleados
+const authRouter = require('./modules/auth/authRouter'); // Rutas de autenticación
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware para CORS
 const corsOptions = {
-    origin: ['http://localhost:00', 'http://localhost:5500'], // Orígenes permitidos
+    origin: ['http://localhost:3000', 'http://187.189.0.114'], // Orígenes permitidos
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE', // Métodos permitidos
     allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
     credentials: true, // Permitir cookies (si es necesario)
 };
-
 app.use(cors(corsOptions));
-
 
 // Middleware para registrar las solicitudes
 app.use(morgan('combined'));
@@ -29,7 +28,7 @@ app.use(morgan('combined'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Ruta base para autenticación
+// Rutas de autenticación
 app.use('/auth', authRouter);
 
 // Configuración de Swagger
@@ -56,6 +55,20 @@ const swaggerOptions = {
                 description: 'Servidor local'
             }
         ],
+        components: {
+            securitySchemes: {
+                bearerAuth: {
+                    type: 'http',
+                    scheme: 'bearer',
+                    bearerFormat: 'JWT'
+                }
+            }
+        },
+        security: [
+            {
+                bearerAuth: []
+            }
+        ]
     },
     apis: ['./modules/employees/routes/*.js', './modules/auth/authRouter.js'], // Rutas a los archivos de Swagger
 };
@@ -64,7 +77,7 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Rutas de la API
+// Rutas de la API de empleados
 app.use('/api/employees', employeeRoutes);
 
 // Manejo de rutas no encontradas
@@ -83,4 +96,4 @@ app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
 
-//prueba rama eduardo
+// Prueba rama eduardo

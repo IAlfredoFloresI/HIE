@@ -66,10 +66,26 @@ const deleteEmployee = async (req, res) => {
     }
 };
 
+// controllers/employeeController.js
+
+// Obtener perfil del empleado basado en su ID en el token JWT
+const getProfile = async (req, res) => {
+    try {
+        const employee = await employeeService.getEmployeeById(req.user.id);
+        if (!employee) {
+            return res.status(404).json({ message: 'Empleado no encontrado' });
+        }
+        res.status(200).json(employee);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener el perfil: ' + error.message });
+    }
+};
+
 module.exports = {
     getEmployeesWithPaginationAndFilters,
     createEmployee,
     getEmployeeById,
     updateEmployee,
-    deleteEmployee
+    deleteEmployee,
+    getProfile,
 };
