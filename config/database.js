@@ -4,13 +4,13 @@ const bcrypt = require('bcrypt');
 
 // Definimos los empleados iniciales
 const employees = [
-    { "id_employee": 1, "employeeName": "Juan Pérez", "email": "juan.perez@example.com", "department": "Recepción", "phoneNumber": "555-1234", "address": "Calle Falsa 123", "status": "activo", "password": "JuanP123!", "role": "Admin" },
-    { "id_employee": 2, "employeeName": "María López", "email": "maria.lopez@example.com", "department": "Cocina", "phoneNumber": "555-5678", "address": "Avenida Siempre Viva 742", "status": "activo", "password": "MariaL789!", "role": "Admin" },
-    { "id_employee": 3, "employeeName": "Pedro Ramírez", "email": "pedro.ramirez@example.com", "department": "Mantenimiento", "phoneNumber": "555-9012", "address": "Calle Luna 456", "status": "activo", "password": "PedroR456#", "role": "Employee" },
-    { "id_employee": 4, "employeeName": "Lucía Fernández", "email": "lucia.fernandez@example.com", "department": "Administración", "phoneNumber": "555-3456", "address": "Calle Sol 789", "status": "activo", "password": "LuciaF789#", "role": "Employee" },
-    { "id_employee": 5, "employeeName": "Carlos González", "email": "carlos.gonzalez@example.com", "department": "Seguridad", "phoneNumber": "555-7890", "address": "Calle Estrella 321", "status": "activo", "password": "CarlosG321!", "role": "Employee" },
-    { "id_employee": 6, "employeeName": "Ana Torres", "email": "ana.torres@example.com", "department": "Recepción", "phoneNumber": "555-2345", "address": "Calle Primavera 111", "status": "activo", "password": "AnaT234#", "role": "Employee" },
-    { "id_employee": 7, "employeeName": "Roberto Gómez", "email": "roberto.gomez@example.com", "department": "Cocina", "phoneNumber": "555-6789", "address": "Avenida Otoño 222", "status": "activo", "password": "RobertoG678!", "role": "Employee" },
+    { "id_employee": 1, "employeeName": "Juan Pérez", "email": "cuentateest0@gmail.com", "department": "Recepción", "phoneNumber": "555-1234", "address": "Calle Falsa 123", "status": "activo", "password": "JuanP123!", "role": "Admin" },
+    { "id_employee": 2, "employeeName": "María López", "email": "cuentateest0@gmail.com", "department": "Cocina", "phoneNumber": "555-5678", "address": "Avenida Siempre Viva 742", "status": "activo", "password": "MariaL789!", "role": "Admin" },
+    { "id_employee": 3, "employeeName": "Pedro Ramírez", "email": "cuentateest0@gmail.com", "department": "Mantenimiento", "phoneNumber": "555-9012", "address": "Calle Luna 456", "status": "activo", "password": "PedroR456#", "role": "Employee" },
+    { "id_employee": 4, "employeeName": "Lucía Fernández", "email": "cuentateest0@gmail.com", "department": "Administración", "phoneNumber": "555-3456", "address": "Calle Sol 789", "status": "activo", "password": "LuciaF789#", "role": "Employee" },
+    { "id_employee": 5, "employeeName": "Carlos González", "email": "cuentateest0@gmail.com", "department": "Seguridad", "phoneNumber": "555-7890", "address": "Calle Estrella 321", "status": "activo", "password": "CarlosG321!", "role": "Employee" },
+    { "id_employee": 6, "employeeName": "Ana Torres", "email": "cuentateest0@gmail.com", "department": "Recepción", "phoneNumber": "555-2345", "address": "Calle Primavera 111", "status": "activo", "password": "AnaT234#", "role": "Employee" },
+    { "id_employee": 7, "employeeName": "Roberto Gómez", "email": "cuentateest0@gmail.com", "department": "Cocina", "phoneNumber": "555-6789", "address": "Avenida Otoño 222", "status": "activo", "password": "RobertoG678!", "role": "Employee" },
     { "id_employee": 8, "employeeName": "Laura Sánchez", "email": "laura.sanchez@example.com", "department": "Ventas", "phoneNumber": "555-5678", "address": "Calle Invierno 333", "status": "activo", "password": "LauraS333#", "role": "Employee" },
     { "id_employee": 9, "employeeName": "Luis Morales", "email": "luis.morales@example.com", "department": "Almacén", "phoneNumber": "555-9012", "address": "Avenida Verano 444", "status": "activo", "password": "LuisM901!", "role": "Employee" },
     { "id_employee": 10, "employeeName": "Elena Castillo", "email": "elena.castillo@example.com", "department": "Administración", "phoneNumber": "555-3456", "address": "Calle Amanecer 555", "status": "activo", "password": "ElenaC345@", "role": "Employee" },
@@ -71,6 +71,7 @@ async function initializeDatabase() {
             status TEXT CHECK(status IN ('activo', 'baja')) NOT NULL,
             password TEXT NOT NULL,  -- Campo de contraseña cifrada
             role TEXT CHECK(role IN ('Admin', 'Employee')) NOT NULL, -- Campo de rol
+            force_password_reset BOOLEAN DEFAULT false, -- Nuevo campo para obligar al cambio de contraseña
             deleted_at TEXT
         )`);             
         console.log('Tabla "employees" verificada/existente.');
