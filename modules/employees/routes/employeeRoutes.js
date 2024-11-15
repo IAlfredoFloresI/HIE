@@ -3,6 +3,7 @@ const router = express.Router();
 const employeeController = require('../controllers/employeeController');
 const authenticate = require('../../../middlewares/authenticate');
 const { authorize, authorizeDeleteEmployee } = require('../../../middlewares/authorize');
+const forcePasswordReset = require('../../../middlewares/forcePasswordReset');
 
 /**
  * @swagger
