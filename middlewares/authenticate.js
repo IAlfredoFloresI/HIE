@@ -22,6 +22,12 @@ const authenticate = (req, res, next) => {
                 return res.status(401).json({ message: 'Token inválido o no autorizado' });
             }
 
+             // Validar que el token contiene un ID válido
+             if (!decoded.id) {
+                return res.status(401).json({ message: 'El token es inválido: falta el ID del usuario.' });
+            }
+            
+
             // Si el token es válido, almacenar datos del usuario decodificados en req.user
             req.user = decoded;
             next(); // Continuar al siguiente middleware/controlador

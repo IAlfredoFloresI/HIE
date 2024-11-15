@@ -11,7 +11,7 @@ const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10, stat
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
-
+    
     // Consulta base
     let query = `SELECT id_employee, employeeName, department, status FROM employees WHERE 1=1`;
     const params = [];

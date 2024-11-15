@@ -7,12 +7,21 @@ const employeeRepository = require('../employees/repositories/employeeRepository
 const login = async (email, password) => {
     const employee = await employeeRepository.getEmployeeByEmail(email);
 
-    if (!employee || !(await bcrypt.compare(password, employee.password))) {
-        throw new Error('Credenciales inválidas');
+    if (!employee) {
+        throw new Error('Credenciales inválidas: correo no encontrado');
     }
 
-    // Generar JWT incluyendo el rol del empleado
-    const token = jwtHelper.generateToken({ id: employee.id_employee, role: employee.role });
+    const isPasswordValid = await bcrypt.compare(password, employee.password);
+    if (!isPasswordValid) {
+        throw new Error('Credenciales inválidas: contraseña incorrecta');
+    }
+
+    // Generar JWT con el ID, email y rol del empleado
+    const token = jwtHelper.generateToken({
+        id: employee.id_employee,
+        email: employee.email,
+        role: employee.role,
+    });
 
     // Retornar el token y el estado de `force_password_reset`
     return { token, forcePasswordReset: employee.force_password_reset };
