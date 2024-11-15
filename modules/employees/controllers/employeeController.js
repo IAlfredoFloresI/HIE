@@ -95,6 +95,32 @@ const getProfile = async (req, res) => {
     }
 };
 
+// Actualizar la contraseña del empleado
+const updatePassword = async (req, res) => {
+    try {
+        const { newPassword } = req.body;
+
+        // Validar que la nueva contraseña cumpla los requisitos
+        if (!newPassword || newPassword.length < 8) {
+            return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 8 caracteres.' });
+        }
+
+        // Hashear la nueva contraseña
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Actualizar la contraseña y desactivar `force_password_reset`
+        const result = await employeeService.updatePassword(req.user.id, hashedPassword);
+
+        if (!result) {
+            return res.status(404).json({ message: 'Empleado no encontrado.' });
+        }
+
+        res.status(200).json({ message: 'Contraseña actualizada correctamente.' });
+    } catch (error) {
+        res.status(500).json({ message: `Error al actualizar la contraseña: ${error.message}` });
+    }
+};
+
 module.exports = {
     getEmployeesWithPaginationAndFilters,
     createEmployee,
@@ -102,4 +128,5 @@ module.exports = {
     updateEmployee,
     deleteEmployee,
     getProfile,
+    updatePassword, // Nueva función exportada
 };

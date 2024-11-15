@@ -15,7 +15,8 @@ const login = async (req, res) => {
         // Responde con el token y el estado de `force_password_reset`
         res.status(200).json({ token, forcePasswordReset });
     } catch (error) {
-        res.status(401).json({ message: error.message });
+        // Devuelve un error de autenticación si las credenciales son incorrectas
+        res.status(401).json({ message: 'Credenciales inválidas. Verifica tu correo y contraseña.' });
     }
 };
 
@@ -26,9 +27,21 @@ const updatePassword = async (req, res) => {
     try {
         const { newPassword } = req.body;
 
-        // Validar que la nueva contraseña cumpla los requisitos
+        // Validar que la nueva contraseña cumpla con los requisitos mínimos
         if (!newPassword || newPassword.length < 8) {
             return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 8 caracteres.' });
+        }
+
+        // Recuperar el empleado actual para comparar la contraseña
+        const employee = await employeeRepository.getEmployeeById(req.user.id);
+        if (!employee) {
+            return res.status(404).json({ message: 'Empleado no encontrado.' });
+        }
+
+        // Validar que la nueva contraseña no sea igual a la anterior
+        const isSamePassword = await bcrypt.compare(newPassword, employee.password);
+        if (isSamePassword) {
+            return res.status(400).json({ message: 'La nueva contraseña no puede ser igual a la anterior.' });
         }
 
         // Hashear la nueva contraseña
@@ -48,4 +61,3 @@ const updatePassword = async (req, res) => {
 };
 
 module.exports = { login, updatePassword };
-

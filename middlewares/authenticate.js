@@ -1,30 +1,35 @@
-// middlewares/authenticate.js
 const jwt = require('jsonwebtoken');
 
-// Middleware de autenticación
+/**
+ * Middleware de autenticación para verificar JWT en solicitudes protegidas.
+ */
 const authenticate = (req, res, next) => {
-    // Obtener el token de los encabezados de la solicitud
-    const token = req.headers.authorization?.split(' ')[1]; // Verifica si el encabezado Authorization existe y extrae el token después de 'Bearer'
+    try {
+        // Obtener el token del encabezado Authorization
+        const authHeader = req.headers.authorization;
 
-    // Si no hay token en la solicitud, responder con un error de autenticación
-    if (!token) {
-        return res.status(401).json({ message: 'Token no proporcionado' });
-    }
-
-    // Verificar el token usando la clave secreta (JWT_SECRET) almacenada en variables de entorno
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err) {
-            // Si la verificación falla, devolver un error de autenticación
-            return res.status(401).json({ message: 'Token inválido o expirado' });
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'No se proporcionó un token válido' });
         }
 
-        // Si el token es válido, almacenamos la información decodificada en `req.user`
-        // Esto permite que otros middlewares o controladores accedan a los datos del usuario autenticado
-        req.user = decoded;
+        // Extraer el token de Bearer
+        const token = authHeader.split(' ')[1];
 
-        // Llamar a `next()` para continuar con el siguiente middleware o controlador
-        next();
-    });
+        // Verificar el token usando la clave secreta
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                // Si hay un error en la verificación del token
+                return res.status(401).json({ message: 'Token inválido o no autorizado' });
+            }
+
+            // Si el token es válido, almacenar datos del usuario decodificados en req.user
+            req.user = decoded;
+            next(); // Continuar al siguiente middleware/controlador
+        });
+    } catch (error) {
+        // Manejo de errores generales
+        res.status(500).json({ message: 'Error de autenticación: ' + error.message });
+    }
 };
 
 module.exports = authenticate;

@@ -89,6 +89,23 @@ const addEmployee = async (employee) => {
     return { id_employee: result.lastID, ...employee };
 };
 
+// **Actualizar contraseña**
+const updatePassword = async (id_employee, hashedPassword) => {
+    const database = await db.openDatabase();
+
+    // Actualiza la contraseña y desactiva el campo `force_password_reset`
+    const result = await database.run(
+        `UPDATE employees 
+         SET password = ?, force_password_reset = ? 
+         WHERE id_employee = ?`,
+        [hashedPassword, false, id_employee]
+    );
+
+    await database.close();
+
+    return result.changes > 0; // Devuelve `true` si se actualizó correctamente
+};
+
 // **Actualizar un empleado**
 const updateEmployee = async (id_employee, employee) => {
     const { employeeName, email, department, phoneNumber, address, status } = employee;
@@ -154,6 +171,7 @@ module.exports = {
     addEmployee,
     updateEmployee,
     deleteEmployee,
+    updatePassword,
     checkEmployeeIdExists,
     getEmployeeByEmail,
 };

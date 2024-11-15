@@ -18,14 +18,12 @@ const getEmployeesWithPaginationAndFilters = async (query) => {
 
 // Obtener un empleado por ID
 const getEmployeeById = async (id_employee) => {
-    // Llama al repositorio para obtener los detalles del empleado
     const employee = await employeeRepository.getEmployeeById(id_employee);
 
     if (!employee) {
         return null; // Devuelve null si el empleado no existe
     }
 
-    // Retorna solo los campos necesarios
     return {
         id_employee: employee.id_employee,
         employeeName: employee.employeeName,
@@ -45,13 +43,10 @@ const addEmployee = async (employee) => {
             throw new Error("Error de validación: Faltan campos obligatorios (employeeName, email, department).");
         }
 
-        // Generar una contraseña aleatoria
+         // Generar una contraseña aleatoria
         const plainPassword = generateRandomPassword();
+        const passwordHash = await bcrypt.hash(plainPassword, 10); // Cifrar la contraseña generada
 
-        // Cifrar la contraseña generada
-        const passwordHash = await bcrypt.hash(plainPassword, 10);
-
-        // Asignar valores por defecto para estado y rol
         const newEmployeeData = {
             ...employee,
             password: passwordHash,
@@ -69,14 +64,12 @@ const addEmployee = async (employee) => {
             `Hola ${newEmployee.employeeName}, tu cuenta ha sido creada exitosamente. Tu contraseña inicial es: ${plainPassword}`
         );
 
-        // Retornar éxito
         return {
             success: true,
             message: "Empleado creado exitosamente.",
-            id_employee: newEmployee.id_employee, // ID del nuevo empleado
+            id_employee: newEmployee.id_employee,
         };
     } catch (error) {
-        // Manejo de errores de validación o base de datos
         if (error.message.includes("Error de validación")) {
             return { success: false, error: error.message };
         }
@@ -94,6 +87,23 @@ const updateEmployee = async (id_employee, employee) => {
         return updatedEmployee;
     } catch (error) {
         throw new Error(`Error al actualizar empleado: ${error.message}`);
+    }
+};
+
+// Actualizar la contraseña del empleado
+const updatePassword = async (id_employee, newPassword) => {
+    try {
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Actualizar la contraseña y desactivar el flag `force_password_reset`
+        const result = await employeeRepository.updatePassword(id_employee, hashedPassword);
+        if (!result) {
+            throw new Error('Empleado no encontrado');
+        }
+
+        return { success: true, message: "Contraseña actualizada correctamente." };
+    } catch (error) {
+        throw new Error(`Error al actualizar contraseña: ${error.message}`);
     }
 };
 
@@ -115,5 +125,6 @@ module.exports = {
     getEmployeeById,
     addEmployee,
     updateEmployee,
+    updatePassword, // Nueva función añadida
     deleteEmployee,
 };
