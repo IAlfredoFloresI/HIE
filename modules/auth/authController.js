@@ -34,7 +34,7 @@ const updatePassword = async (req, res) => {
 
         // Recuperar el empleado actual para comparar la contraseña
         const employee = await employeeRepository.getEmployeeById(req.user.id);
-        if (!employee) {
+        if (!employee) {    
             return res.status(404).json({ message: 'Empleado no encontrado.' });
         }
 

@@ -1,5 +1,6 @@
 const express = require('express');
 const authController = require('./authController');
+const authenticate = require('../../middlewares/authenticate'); // Middleware para verificar el token JWT
 
 const router = express.Router();
 
@@ -76,6 +77,6 @@ router.post('/login', authController.login);
  *       500:
  *         description: Error del servidor
  */
-router.post('/update-password', authController.updatePassword);
+router.post('/update-password', authenticate, authController.updatePassword);
 
 module.exports = router;
