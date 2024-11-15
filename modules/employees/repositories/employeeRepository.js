@@ -1,43 +1,42 @@
 const path = require('path');
 const db = require(path.join(__dirname, '../../../db')); // Importar la función para abrir la base de datos
-const removeAccents = require('remove-accents'); // Asegúrate de tener esta librería
+const removeAccents = require('remove-accents');
 const bcrypt = require('bcrypt');
 
-// Obtener empleados con paginación y filtros
+// **Obtener empleados con paginación y filtros**
 const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10, status, department, searchTerm }) => {
     const database = await db.openDatabase();
 
-    // Convertimos page y limit a enteros para asegurarnos de que tienen un valor
+    // Convertimos `page` y `limit` a enteros para evitar valores inválidos
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
-
     const offset = (page - 1) * limit;
 
-    // Construimos la consulta base
-    let query = `SELECT * FROM employees WHERE 1=1`;
+    // Consulta base
+    let query = `SELECT id_employee, employeeName, department, status FROM employees WHERE 1=1`;
     const params = [];
 
-    // Filtro de estado
+    // Filtro por estado
     if (status) {
         query += ` AND status = ?`;
         params.push(status);
     }
 
-    // Filtro de departamento
+    // Filtro por departamento
     if (department) {
         query += ` AND department = ?`;
         params.push(department);
     }
 
-    // Paginación
+    // Agregar límites de paginación
     query += ` LIMIT ? OFFSET ?`;
     params.push(limit, offset);
 
-    // Ejecutar la consulta
+    // Ejecutar consulta
     const employees = await database.all(query, params);
     await database.close();
 
-    // Aplicar filtro de búsqueda en JavaScript
+    // Filtro de búsqueda por nombre (aplicado en JS, no en SQL)
     if (searchTerm) {
         const normalizedSearchTerm = removeAccents(searchTerm.toLowerCase());
         return employees.filter(employee =>
@@ -48,80 +47,131 @@ const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10, stat
     return employees;
 };
 
-// Obtener un empleado por ID
-const getEmployeeById = async (id) => {
+// **Obtener un empleado por ID**
+const getEmployeeById = async (id_employee) => {
     const database = await db.openDatabase();
-    const employee = await database.get('SELECT * FROM employees WHERE id_employee = ?', id);
+    const query = `
+        SELECT id_employee, employeeName, department, email, phoneNumber, address, status
+        FROM employees
+        WHERE id_employee = ?;
+    `;
+    const employee = await database.get(query, [id_employee]);
     await database.close();
-    return employee;
+
+    return employee; // Devuelve `undefined` si no encuentra al empleado
 };
 
-// Crear un nuevo empleado
+// **Crear un nuevo empleado**
 const addEmployee = async (employee) => {
-    const { employeeName, email, department, phoneNumber, address, status } = employee;
-    const passwordHash = await bcrypt.hash(employee.password, 10);
+    const { employeeName, email, department, phoneNumber, address, password, role, status } = employee;
+
     const database = await db.openDatabase();
     const result = await database.run(
-        `INSERT INTO employees (employeeName, email, department, phoneNumber, address, status, password) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-        [employeeName, email, department, phoneNumber, address, status, passwordHash]
+        `INSERT INTO employees 
+         (employeeName, email, department, phoneNumber, address, password, role, status, force_password_reset) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+            employeeName,
+            email,
+            department,
+            phoneNumber,
+            address,
+            password,
+            role,
+            status,
+            true, // `force_password_reset` siempre es `true` al crear empleados
+        ]
     );
+
     await database.close();
+
+    // Retorna el ID del nuevo empleado junto con los datos relevantes
     return { id_employee: result.lastID, ...employee };
 };
 
-// Actualizar un empleado
-const updateEmployee = async (id, employee) => {
+// **Actualizar contraseña**
+const updatePassword = async (id_employee, hashedPassword) => {
+    const database = await db.openDatabase();
+
+    // Actualiza la contraseña y desactiva el campo `force_password_reset`
+    const result = await database.run(
+        `UPDATE employees 
+         SET password = ?, force_password_reset = ? 
+         WHERE id_employee = ?`,
+        [hashedPassword, false, id_employee]
+    );
+
+    await database.close();
+
+    return result.changes > 0; // Devuelve `true` si se actualizó correctamente
+};
+
+// **Actualizar un empleado**
+const updateEmployee = async (id_employee, employee) => {
     const { employeeName, email, department, phoneNumber, address, status } = employee;
+
     const database = await db.openDatabase();
     const result = await database.run(
-        `UPDATE employees SET employeeName = ?, email = ?, department = ?, phoneNumber = ?, address = ?, status = ? WHERE id_employee = ?`,
-        [employeeName, email, department, phoneNumber, address, status, id]
-    );
-    await database.close();
-    return result.changes > 0 ? { id_employee: id, ...employee } : null;
-};
-
-// Eliminar (desactivar) un empleado
-const deleteEmployee = async (id) => {
-    const database = await db.openDatabase();
-    const deletedAt = new Date().toISOString(); // Fecha y hora actual en formato ISO
-
-    const result = await database.run(
-        `UPDATE employees SET status = 'baja', deleted_at = ? WHERE id_employee = ?`,
-        [deletedAt, id]
+        `UPDATE employees 
+         SET employeeName = ?, email = ?, department = ?, phoneNumber = ?, address = ?, status = ? 
+         WHERE id_employee = ?`,
+        [employeeName, email, department, phoneNumber, address, status, id_employee]
     );
 
     await database.close();
-    return result.changes > 0; // Devuelve true si se actualizó un registro
+
+    return result.changes > 0 ? { id_employee, ...employee } : null; // Devuelve `null` si no se actualizó
 };
 
+// **Eliminar un empleado (marcar como "baja")**
+const deleteEmployee = async (id_employee) => {
+    const database = await db.openDatabase();
+    const deletedAt = new Date().toISOString(); // Fecha y hora actuales en formato ISO
+
+    const result = await database.run(
+        `UPDATE employees 
+         SET status = 'baja', deleted_at = ? 
+         WHERE id_employee = ?`,
+        [deletedAt, id_employee]
+    );
+
+    await database.close();
+
+    return result.changes > 0; // Devuelve `true` si se actualizó el registro
+};
+
+// **Verificar si un ID de empleado existe**
 const checkEmployeeIdExists = async (id_employee) => {
     const database = await db.openDatabase();
     const employee = await database.get(
-        'SELECT * FROM employees WHERE id_employee = ?',
-        id_employee
+        'SELECT id_employee FROM employees WHERE id_employee = ?',
+        [id_employee]
     );
     await database.close();
-    return employee !== undefined;
+
+    return !!employee; // Devuelve `true` si el empleado existe
 };
 
-// Función para obtener un empleado por email
+// **Obtener un empleado por email**
 const getEmployeeByEmail = async (email) => {
     const database = await db.openDatabase();
     const employee = await database.get(
         'SELECT * FROM employees WHERE email = ?',
-        email
+        [email]
     );
     await database.close();
-    return employee;
+
+    return employee; // Devuelve `undefined` si no encuentra al empleado
 };
 
+// Exportar funciones del repositorio
 module.exports = {
     getEmployeesWithPaginationAndFilters,
-    getEmployeeByEmail,
     getEmployeeById,
     addEmployee,
     updateEmployee,
     deleteEmployee,
+    updatePassword,
     checkEmployeeIdExists,
+    getEmployeeByEmail,
 };

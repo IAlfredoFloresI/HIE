@@ -10,10 +10,12 @@ const login = async (email, password) => {
     if (!employee || !(await bcrypt.compare(password, employee.password))) {
         throw new Error('Credenciales inválidas');
     }
-    
+
     // Generar JWT incluyendo el rol del empleado
     const token = jwtHelper.generateToken({ id: employee.id_employee, role: employee.role });
-    return token;
+
+    // Retornar el token y el estado de `force_password_reset`
+    return { token, forcePasswordReset: employee.force_password_reset };
 };
 
 module.exports = { login };

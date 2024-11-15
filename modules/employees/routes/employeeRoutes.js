@@ -4,7 +4,6 @@ const employeeController = require('../controllers/employeeController');
 const authenticate = require('../../../middlewares/authenticate');
 const { authorize, authorizeDeleteEmployee } = require('../../../middlewares/authorize');
 
-
 /**
  * @swagger
  * tags:
@@ -14,6 +13,25 @@ const { authorize, authorizeDeleteEmployee } = require('../../../middlewares/aut
 
 // Aplica autenticación a todas las rutas de este archivo
 router.use(authenticate);
+router.use(forcePasswordReset);
+
+
+/**
+ * @swagger
+ * /api/employees/profile:
+ *   get:
+ *     summary: Obtener perfil del empleado (Admin and Employee)
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Accesible para roles Admin y Employee.
+ *     responses:
+ *       200:
+ *         description: Perfil del empleado obtenido
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/profile', authorize(['Admin', 'Employee']), employeeController.getProfile);
 
 /**
  * @swagger
@@ -33,19 +51,22 @@ router.use(authenticate);
  *             properties:
  *               id_employee:
  *                 type: integer
+ *                 description: ID único del empleado
  *               employeeName:
  *                 type: string
+ *                 description: Nombre completo del empleado
  *               email:
  *                 type: string
+ *                 description: Correo electrónico del empleado
  *               department:
  *                 type: string
+ *                 description: Departamento del empleado
  *               phoneNumber:
  *                 type: string
+ *                 description: Número de teléfono (opcional)
  *               address:
  *                 type: string
- *               status:
- *                 type: string
- *                 enum: [activo, baja]
+ *                 description: Dirección (opcional)
  *     responses:
  *       201:
  *         description: Empleado creado
@@ -56,44 +77,13 @@ router.post('/', authorize(['Admin']), employeeController.createEmployee);
 
 /**
  * @swagger
- * /api/employees/{id_employee}:
- *   get:
- *     summary: Obtener un empleado por ID (Admin only)
+ * /api/employees/update-password:
+ *   post:
+ *     summary: Actualizar contraseña del empleado
  *     tags: [Employees]
  *     security:
  *       - bearerAuth: []
- *     description: Solo accesible para el rol de Admin.
- *     parameters:
- *       - name: id_employee
- *         in: path
- *         required: true
- *         description: ID del empleado
- *         schema:
- *           type: integer
- *     responses:
- *       200:
- *         description: Empleado encontrado
- *       404:
- *         description: Empleado no encontrado
- */
-router.get('/:id_employee', authorize(['Admin']), employeeController.getEmployeeById);
-
-/**
- * @swagger
- * /api/employees/{id_employee}:
- *   put:
- *     summary: Actualizar un empleado (Admin only)
- *     tags: [Employees]
- *     security:
- *       - bearerAuth: []
- *     description: Solo accesible para el rol de Admin.
- *     parameters:
- *       - name: id_employee
- *         in: path
- *         required: true
- *         description: ID del empleado a actualizar
- *         schema:
- *           type: integer
+ *     description: Permite al empleado actualizar su contraseña. Requiere autenticación.
  *     requestBody:
  *       required: true
  *       content:
@@ -101,52 +91,20 @@ router.get('/:id_employee', authorize(['Admin']), employeeController.getEmployee
  *           schema:
  *             type: object
  *             properties:
- *               employeeName:
+ *               newPassword:
  *                 type: string
- *               email:
- *                 type: string
- *               department:
- *                 type: string
- *               phoneNumber:
- *                 type: string
- *               address:
- *                 type: string
- *               status:
- *                 type: string
- *                 enum: [activo, baja]
+ *                 description: Nueva contraseña del empleado
  *     responses:
  *       200:
- *         description: Empleado actualizado
+ *         description: Contraseña actualizada correctamente
  *       400:
  *         description: Solicitud incorrecta
  *       404:
  *         description: Empleado no encontrado
+ *       500:
+ *         description: Error interno del servidor
  */
-router.put('/:id_employee', authorize(['Admin']), employeeController.updateEmployee);
-
-/**
- * @swagger
- * /api/employees/{id_employee}:
- *   delete:
- *     summary: Eliminar un empleado (Admin only, no puede eliminar otros Admins)
- *     tags: [Employees]
- *     security:
- *       - bearerAuth: []
- *     description: Solo accesible para el rol de Admin.
- *     parameters:
- *       - name: id_employee
- *         in: path
- *         required: true
- *         description: ID del empleado a eliminar
- *         schema:
- *           type: integer
- *     responses:
- *       204:
- *         description: Empleado eliminado
- *       404:
- *         description: Empleado no encontrado
- */
-router.delete('/:id_employee', authorize(['Admin']), authorizeDeleteEmployee(), employeeController.deleteEmployee);
+router.post('/update-password', employeeController.updatePassword);
 
 /**
  * @swagger
@@ -186,6 +144,24 @@ router.delete('/:id_employee', authorize(['Admin']), authorizeDeleteEmployee(), 
  *     responses:
  *       200:
  *         description: Lista de empleados filtrada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 employees:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id_employee:
+ *                         type: integer
+ *                       employeeName:
+ *                         type: string
+ *                       department:
+ *                         type: string
+ *                       status:
+ *                         type: string
  *       500:
  *         description: Error interno del servidor
  */
@@ -193,19 +169,95 @@ router.get('/', authorize(['Admin']), employeeController.getEmployeesWithPaginat
 
 /**
  * @swagger
- * /api/employees/profile:
+ * /api/employees/{id_employee}:
  *   get:
- *     summary: Obtener perfil del empleado (Admin and Employee)
+ *     summary: Obtener detalles de un empleado por ID
  *     tags: [Employees]
  *     security:
  *       - bearerAuth: []
- *     description: Accesible para roles Admin y Employee.
+ *     description: Retorna los detalles del empleado por ID. Solo accesible por Admin.
+ *     parameters:
+ *       - name: id_employee
+ *         in: path
+ *         required: true
+ *         description: ID del empleado
+ *         schema:
+ *           type: integer
  *     responses:
  *       200:
- *         description: Perfil del empleado obtenido
- *       401:
- *         description: No autorizado
+ *         description: Detalles del empleado encontrados
+ *       404:
+ *         description: Empleado no encontrado
+ *       500:
+ *         description: Error interno del servidor
  */
-router.get('/profile', authorize(['Admin', 'Employee']), employeeController.getProfile);
+router.get('/:id_employee', authorize(['Admin']), employeeController.getEmployeeById);
+
+/**
+ * @swagger
+ * /api/employees/{id_employee}:
+ *   put:
+ *     summary: Actualizar un empleado (Admin only)
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Solo accesible para el rol de Admin.
+ *     parameters:
+ *       - name: id_employee
+ *         in: path
+ *         required: true
+ *         description: ID del empleado a actualizar
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               employeeName:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               department:
+ *                 type: string
+ *               phoneNumber:
+ *                 type: string
+ *               address:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Empleado actualizado
+ *       400:
+ *         description: Solicitud incorrecta
+ *       404:
+ *         description: Empleado no encontrado
+ */
+router.put('/:id_employee', authorize(['Admin']), employeeController.updateEmployee);
+
+/**
+ * @swagger
+ * /api/employees/{id_employee}:
+ *   delete:
+ *     summary: Eliminar un empleado (Admin only, no puede eliminar otros Admins)
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Solo accesible para el rol de Admin.
+ *     parameters:
+ *       - name: id_employee
+ *         in: path
+ *         required: true
+ *         description: ID del empleado a eliminar
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       204:
+ *         description: Empleado eliminado
+ *       404:
+ *         description: Empleado no encontrado
+ */
+router.delete('/:id_employee', authorize(['Admin']), authorizeDeleteEmployee(), employeeController.deleteEmployee);
 
 module.exports = router;
