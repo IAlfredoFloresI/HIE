@@ -78,37 +78,6 @@ router.post('/', authorize(['Admin']), employeeController.createEmployee);
 
 /**
  * @swagger
- * /api/employees/update-password:
- *   post:
- *     summary: Actualizar contraseña del empleado
- *     tags: [Employees]
- *     security:
- *       - bearerAuth: []
- *     description: Permite al empleado actualizar su contraseña. Requiere autenticación.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               newPassword:
- *                 type: string
- *                 description: Nueva contraseña del empleado
- *     responses:
- *       200:
- *         description: Contraseña actualizada correctamente
- *       400:
- *         description: Solicitud incorrecta
- *       404:
- *         description: Empleado no encontrado
- *       500:
- *         description: Error interno del servidor
- */
-router.post('/update-password', employeeController.updatePassword);
-
-/**
- * @swagger
  * /api/employees:
  *   get:
  *     summary: Obtener empleados con paginación y filtros (Admin only)
