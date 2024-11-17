@@ -4,8 +4,8 @@ const router = express.Router();
 
 // Endpoint para descargar la base de datos
 router.get('/download-db', (req, res) => {
-    // Ajusta la ruta según la ubicación del archivo database.db
-    const dbPath = path.resolve(__dirname, '../config/database.db');
+    // Ruta correcta a la base de datos en la raíz del proyecto
+    const dbPath = path.resolve(__dirname, '../database.db');
 
     console.log('Ruta del archivo de base de datos:', dbPath); // Para diagnóstico
 
