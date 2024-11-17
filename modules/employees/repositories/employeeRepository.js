@@ -51,7 +51,7 @@ const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10, stat
 const getEmployeeById = async (id_employee) => {
     const database = await db.openDatabase();
     const query = `
-        SELECT id_employee, employeeName, department, email, phoneNumber, address, status
+        SELECT id_employee, employeeName, department, email, phoneNumber, address, status, password
         FROM employees
         WHERE id_employee = ?;
     `;
@@ -60,6 +60,7 @@ const getEmployeeById = async (id_employee) => {
 
     return employee; // Devuelve `undefined` si no encuentra al empleado
 };
+
 
 // **Crear un nuevo empleado**
 const addEmployee = async (employee) => {
