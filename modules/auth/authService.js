@@ -2,7 +2,8 @@
 const bcrypt = require('bcrypt');
 const jwtHelper = require('./jwtHelper');
 const employeeRepository = require('../employees/repositories/employeeRepository');
-const sendEmail = require('../../helpers/emailSender');
+const { sendEmail } = require('../../helpers/emailSender');
+const crypto = require('crypto');
 
 // Servicio de autenticación
 const login = async (email, password) => {
