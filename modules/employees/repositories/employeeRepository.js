@@ -11,7 +11,7 @@ const getEmployeesWithPaginationAndFilters = async ({ page = 1, limit = 10, stat
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 10;
     const offset = (page - 1) * limit;
-    
+
     // Consulta base
     let query = `SELECT id_employee, employeeName, department, status FROM employees WHERE 1=1`;
     const params = [];
@@ -91,19 +91,28 @@ const addEmployee = async (employee) => {
 
 // **Actualizar contraseña**
 const updatePassword = async (id_employee, hashedPassword) => {
+    console.log("ID del empleado:", id_employee);
+    console.log("Nueva contraseña hasheada:", hashedPassword);
+
     const database = await db.openDatabase();
 
-    // Actualiza la contraseña y desactiva el campo `force_password_reset`
-    const result = await database.run(
-        `UPDATE employees 
-         SET password = ?, force_password_reset = ? 
-         WHERE id_employee = ?`,
-        [hashedPassword, false, id_employee]
-    );
+    try {
+        // Actualiza la contraseña y desactiva el campo `force_password_reset`
+        const result = await database.run(
+            `UPDATE employees 
+             SET password = ?, force_password_reset = ? 
+             WHERE id_employee = ?`,
+            [hashedPassword, false, id_employee]
+        );
 
-    await database.close();
-
-    return result.changes > 0; // Devuelve `true` si se actualizó correctamente
+        console.log("Resultado de la operación en la base de datos:", result);
+        return result.changes > 0; // Devuelve `true` si se actualizó correctamente
+    } catch (error) {
+        console.error("Error al actualizar la contraseña en la base de datos:", error.message);
+        throw error;
+    } finally {
+        await database.close();
+    }
 };
 
 // **Actualizar un empleado**
