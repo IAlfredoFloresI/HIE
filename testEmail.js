@@ -20,3 +20,4 @@ async function testSMTP() {
 }
 
 testSMTP();
+//eliminar archivo
