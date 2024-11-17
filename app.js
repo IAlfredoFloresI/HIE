@@ -6,14 +6,14 @@ const swaggerUi = require('swagger-ui-express');
 const cors = require('cors');
 const morgan = require('morgan');
 
-const debugRoutes = require('./modules/debugRoutes'); // Importa la ruta de depuración
-app.use('/debug', debugRoutes); // Usa el prefijo "/debug" para acceder al endpoint
-
 const employeeRoutes = require('./modules/employees/routes/employeeRoutes'); // Rutas de empleados
 const authRouter = require('./modules/auth/authRouter'); // Rutas de autenticación
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const debugRoutes = require('./modules/debugRoutes'); // Importa la ruta de depuración
+app.use('/debug', debugRoutes); // Usa el prefijo "/debug" para acceder al endpoint
 
 // Middleware para CORS
 const corsOptions = {
