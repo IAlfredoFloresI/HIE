@@ -63,4 +63,37 @@ const updatePassword = async (req, res) => {
     }
 };
 
-module.exports = { login, updatePassword };
+/**
+ * Controlador para solicitar recuperación de contraseña.
+ */
+const requestPasswordReset = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        // Servicio que maneja la lógica de generación de token y envío de correo
+        await authService.requestPasswordReset(email);
+
+        res.status(200).json({ message: 'Se ha enviado un enlace de recuperación al correo electrónico.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al solicitar recuperación de contraseña: ' + error.message });
+    }
+};
+
+/**
+ * Controlador para restablecer la contraseña.
+ */
+const resetPassword = async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        // Servicio que valida el token y restablece la contraseña
+        await authService.resetPassword(token, newPassword);
+
+        res.status(200).json({ message: 'Contraseña actualizada correctamente.' });
+    } catch (error) {
+        res.status(400).json({ message: 'Error al restablecer la contraseña: ' + error.message });
+    }
+};
+
+
+module.exports = { login, updatePassword, requestPasswordReset, resetPassword };

@@ -78,6 +78,19 @@ async function initializeDatabase() {
         `);
         console.log('Tabla "employees" verificada/existente.');
 
+        // Crear tabla para los tokens de restablecimiento de contraseña
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS password_reset_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_employee INTEGER NOT NULL,
+                token TEXT NOT NULL,
+                expiration TEXT NOT NULL,
+                FOREIGN KEY (id_employee) REFERENCES employees(id_employee)
+            );
+        `);
+
+        console.log('Tabla "password_reset_tokens" verificada/existente.');
+
         // Verificar si la tabla ya tiene datos
         const { count } = await db.get('SELECT COUNT(*) AS count FROM employees');
 
