@@ -26,6 +26,7 @@ const login = async (req, res) => {
 const updatePassword = async (req, res) => {
     try {
         const { newPassword } = req.body;
+        console.log("Nueva contraseña recibida:", newPassword);
 
         // Validar que la nueva contraseña cumpla con los requisitos mínimos
         if (!newPassword || newPassword.length < 8) {
@@ -34,21 +35,27 @@ const updatePassword = async (req, res) => {
 
         // Recuperar el empleado actual para comparar la contraseña
         const employee = await employeeRepository.getEmployeeById(req.user.id);
-        if (!employee) {    
+        console.log("Empleado recuperado:", employee);
+
+        if (!employee) {
             return res.status(404).json({ message: 'Empleado no encontrado.' });
         }
 
         // Validar que la nueva contraseña no sea igual a la anterior
         const isSamePassword = await bcrypt.compare(newPassword, employee.password);
+        console.log("¿Es la misma contraseña anterior?", isSamePassword);
+
         if (isSamePassword) {
             return res.status(400).json({ message: 'La nueva contraseña no puede ser igual a la anterior.' });
         }
 
         // Hashear la nueva contraseña
         const hashedPassword = await bcrypt.hash(newPassword, 10);
+        console.log("Contraseña hasheada:", hashedPassword);
 
         // Actualizar la contraseña y desactivar `force_password_reset`
         const result = await employeeRepository.updatePassword(req.user.id, hashedPassword);
+        console.log("Resultado de la actualización:", result);
 
         if (!result) {
             return res.status(404).json({ message: 'Empleado no encontrado.' });
@@ -56,8 +63,10 @@ const updatePassword = async (req, res) => {
 
         res.status(200).json({ message: 'Contraseña actualizada correctamente.' });
     } catch (error) {
+        console.error("Error en el controlador de actualización de contraseña:", error.message);
         res.status(500).json({ message: 'Error al actualizar la contraseña: ' + error.message });
     }
 };
+
 
 module.exports = { login, updatePassword };
