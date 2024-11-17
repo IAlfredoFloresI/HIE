@@ -2,6 +2,7 @@
 const bcrypt = require('bcrypt');
 const jwtHelper = require('./jwtHelper');
 const employeeRepository = require('../employees/repositories/employeeRepository');
+const sendEmail = require('../../helpers/emailSender');
 
 // Servicio de autenticación
 const login = async (email, password) => {
@@ -27,4 +28,69 @@ const login = async (email, password) => {
     return { token, forcePasswordReset: employee.force_password_reset };
 };
 
-module.exports = { login };
+const requestPasswordReset = async (email) => {
+    const employee = await employeeRepository.getEmployeeByEmail(email);
+    if (!employee) {
+        throw new Error('No existe un usuario con ese correo electrónico.');
+    }
+
+    // Generar un token único y establecer su expiración
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiration = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
+
+    // Guardar el token en la base de datos
+    await employeeRepository.savePasswordResetToken(employee.id_employee, token, expiration);
+
+    // Enviar el enlace al correo electrónico
+    const resetLink = `https://miaplicacion.com/reset-password?token=${token}`;
+    const subject = 'Restablecimiento de contraseña';
+    const text = `
+Hola ${employee.employeeName},
+
+Has solicitado restablecer tu contraseña. Por favor, usa el siguiente enlace para configurarla nuevamente. Este enlace es válido por 15 minutos:
+
+${resetLink}
+
+Si no solicitaste este cambio, ignora este mensaje.
+
+Gracias,
+El equipo de Holiday Inn Express
+    `;
+
+    await sendEmail(employee.email, subject, text);
+};
+
+const resetPassword = async (token, newPassword) => {
+    const tokenData = await employeeRepository.getPasswordResetToken(token);
+    if (!tokenData || tokenData.expiration < new Date()) {
+        throw new Error('El token es inválido o ha expirado.');
+    }
+
+    // Validar nueva contraseña
+    if (!newPassword || newPassword.length < 8) {
+        throw new Error('La nueva contraseña debe tener al menos 8 caracteres.');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Actualizar contraseña y eliminar token
+    await employeeRepository.updatePassword(tokenData.id_employee, hashedPassword);
+    await employeeRepository.deletePasswordResetToken(tokenData.token);
+
+    // Enviar correo de confirmación
+    const employee = await employeeRepository.getEmployeeById(tokenData.id_employee);
+    const subject = 'Tu contraseña ha sido actualizada';
+    const text = `
+Hola ${employee.employeeName},
+
+Tu contraseña ha sido actualizada correctamente. Si no realizaste este cambio, por favor contacta a soporte de inmediato.
+
+Gracias,
+El equipo de Holiday Inn Express
+    `;
+
+    await sendEmail(employee.email, subject, text);
+};
+
+
+module.exports = { login, requestPasswordReset, resetPassword };

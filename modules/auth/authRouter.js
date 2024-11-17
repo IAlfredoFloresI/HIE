@@ -79,4 +79,54 @@ router.post('/login', authController.login);
  */
 router.post('/update-password', authenticate, authController.updatePassword);
 
+/**
+ * @swagger
+ * /auth/request-password-reset:
+ *   post:
+ *     summary: Solicitar restablecimiento de contraseña.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: "usuario@example.com"
+ *     responses:
+ *       200:
+ *         description: Enlace de restablecimiento enviado al correo.
+ *       404:
+ *         description: Usuario no encontrado.
+ */
+router.post('/request-password-reset', authController.requestPasswordReset);
+
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     summary: Restablecer contraseña usando un token.
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               token:
+ *                 type: string
+ *               newPassword:
+ *                 type: string
+ *                 example: "nuevaContraseña123!"
+ *     responses:
+ *       200:
+ *         description: Contraseña actualizada correctamente.
+ *       400:
+ *         description: Token inválido o contraseña no válida.
+ */
+router.post('/reset-password', authController.resetPassword);
+
 module.exports = router;
