@@ -2,7 +2,7 @@ require('dotenv').config();
 const sqlite3 = require('sqlite3');
 const { open } = require('sqlite');
 const bcrypt = require('bcrypt');
-const sendEmail = require('../helpers/emailSender');
+const { sendEmail } = require('../helpers/emailSender');
 const generateRandomPassword = require('../helpers/passwordGenerator'); // Importación de la función
 
 // Definimos los empleados iniciales
@@ -73,7 +73,8 @@ async function initializeDatabase() {
                 password TEXT NOT NULL, -- Contraseña cifrada
                 role TEXT CHECK(role IN ('Admin', 'Employee')) NOT NULL,
                 force_password_reset BOOLEAN DEFAULT false, -- Obligatorio cambiar contraseña
-                deleted_at TEXT
+                deleted_at TEXT,
+                qr_enabled BOOLEAN DEFAULT true -- Estado de habilitación del QR
             )
         `);
         console.log('Tabla "employees" verificada/existente.');
