@@ -202,6 +202,19 @@ const deletePasswordResetToken = async (token) => {
     await database.close();
 };
 
+/**
+ * Actualizar el estado del QR de un empleado.
+ */
+const updateQREnabledState = async (id_employee, enabled) => {
+    const database = await db.openDatabase();
+    const result = await database.run(
+        `UPDATE employees SET qr_enabled = ? WHERE id_employee = ?`,
+        [enabled, id_employee]
+    );
+    await database.close();
+    return result.changes > 0;
+};
+
 // Exportar funciones del repositorio
 module.exports = {
     getEmployeesWithPaginationAndFilters,
@@ -215,4 +228,5 @@ module.exports = {
     savePasswordResetToken,
     getPasswordResetToken,
     deletePasswordResetToken,
+    updateQREnabledState,
 };

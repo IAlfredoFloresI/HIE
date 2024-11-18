@@ -230,4 +230,71 @@ router.put('/:id_employee', authorize(['Admin']), employeeController.updateEmplo
  */
 router.delete('/:id_employee', authorize(['Admin']), authorizeDeleteEmployee(), employeeController.deleteEmployee);
 
+/**
+ * @swagger
+ * /api/employees/{id}/qr:
+ *   get:
+ *     summary: Generar código QR para un empleado
+ *     tags: [Employees]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID del empleado
+ *     responses:
+ *       200:
+ *         description: QR generado exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 qrImage:
+ *                   type: string
+ *                   format: base64
+ *                   description: Imagen del código QR en formato base64
+ *       404:
+ *         description: Empleado no encontrado
+ *       500:
+ *         description: Error al generar el código QR
+ */
+router.get('/:id/qr', employeeController.generateQR);
+
+/**
+ * @swagger
+ * api/employees/{id}/qr-state:
+ *   patch:
+ *     summary: Habilitar o deshabilitar el código QR de un empleado
+ *     tags: [Employees]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID del empleado
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               enabled:
+ *                 type: boolean
+ *                 description: Estado de habilitación del QR (true para habilitar, false para deshabilitar)
+ *     responses:
+ *       200:
+ *         description: Estado del QR actualizado exitosamente
+ *       400:
+ *         description: Error en los datos enviados
+ *       404:
+ *         description: Empleado no encontrado
+ *       500:
+ *         description: Error al actualizar el estado del QR
+ */
+router.patch('/:id/qr-state', employeeController.toggleQRState);
+
 module.exports = router;

@@ -1,4 +1,6 @@
 const employeeService = require('../services/employeeService');
+const QRCode = require('qrcode'); // Para generar QR
+const employeeRepository = require('../repositories/employeeRepository');
 
 // Obtener empleados con paginación y filtros
 const getEmployeesWithPaginationAndFilters = async (req, res) => {
@@ -121,6 +123,54 @@ const updatePassword = async (req, res) => {
     }
 };
 
+/**
+ * Generar un QR dinámico para un empleado.
+ */
+const generateQR = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verificar si el empleado existe
+        const employee = await employeeRepository.getEmployeeById(id);
+        if (!employee) {
+            return res.status(404).json({ message: 'Empleado no encontrado.' });
+        }
+
+        // Generar el contenido del QR
+        const qrContent = `empleado-id:${id}`;
+        const qrImage = await QRCode.toDataURL(qrContent);
+
+        res.status(200).json({ qrImage });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al generar el código QR: ' + error.message });
+    }
+};
+
+/**
+ * Habilitar o deshabilitar el QR.
+ */
+const toggleQRState = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { enabled } = req.body;
+
+        // Validar el estado enviado
+        if (typeof enabled !== 'boolean') {
+            return res.status(400).json({ message: 'El estado debe ser un valor booleano.' });
+        }
+
+        // Actualizar el estado del QR en la base de datos
+        const updated = await employeeRepository.updateQREnabledState(id, enabled);
+        if (!updated) {
+            return res.status(404).json({ message: 'Empleado no encontrado.' });
+        }
+
+        res.status(200).json({ message: `Código QR ${enabled ? 'habilitado' : 'deshabilitado'} correctamente.` });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al actualizar el estado del código QR: ' + error.message });
+    }
+};
+
 module.exports = {
     getEmployeesWithPaginationAndFilters,
     createEmployee,
@@ -129,4 +179,6 @@ module.exports = {
     deleteEmployee,
     getProfile,
     updatePassword, // Nueva función exportada
+    generateQR, 
+    toggleQRState ,
 };
