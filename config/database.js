@@ -8,12 +8,12 @@ const generateRandomPassword = require('../helpers/passwordGenerator'); // Impor
 // Definimos los empleados iniciales
 const employees = [
     { "id_employee": 1, "employeeName": "Juan Pérez", "email": "cuentateest0@gmail.com", "department": "Recepción", "phoneNumber": "555-1234", "address": "Calle Falsa 123", "status": "activo", "role": "Admin" },
-    { "id_employee": 2, "employeeName": "María López", "email": "cuentateest0@gmail.com", "department": "Cocina", "phoneNumber": "555-5678", "address": "Avenida Siempre Viva 742", "status": "activo", "role": "Admin" },
-    { "id_employee": 3, "employeeName": "Pedro Ramírez", "email": "cuentateest0@gmail.com", "department": "Mantenimiento", "phoneNumber": "555-9012", "address": "Calle Luna 456", "status": "activo", "role": "Employee" },
-    { "id_employee": 4, "employeeName": "Lucía Fernández", "email": "cuentateest0@gmail.com", "department": "Administración", "phoneNumber": "555-3456", "address": "Calle Sol 789", "status": "activo", "role": "Employee" },
-    { "id_employee": 5, "employeeName": "Carlos González", "email": "cuentateest0@gmail.com", "department": "Seguridad", "phoneNumber": "555-7890", "address": "Calle Estrella 321", "status": "activo", "role": "Employee" },
-    { "id_employee": 6, "employeeName": "Ana Torres", "email": "cuentateest0@gmail.com", "department": "Recepción", "phoneNumber": "555-2345", "address": "Calle Primavera 111", "status": "activo","role": "Employee" },
-    { "id_employee": 7, "employeeName": "Roberto Gómez", "email": "cuentateest0@gmail.com", "department": "Cocina", "phoneNumber": "555-6789", "address": "Avenida Otoño 222", "status": "activo", "role": "Employee" },
+    { "id_employee": 2, "employeeName": "María López", "email": "eduardoflores121298@gmail.com", "department": "Cocina", "phoneNumber": "555-5678", "address": "Avenida Siempre Viva 742", "status": "activo", "role": "Admin" },
+    { "id_employee": 3, "employeeName": "Pedro Ramírez", "email": "segufians@gmail.com", "department": "Mantenimiento", "phoneNumber": "555-9012", "address": "Calle Luna 456", "status": "activo", "role": "Employee" },
+    { "id_employee": 4, "employeeName": "Lucía Fernández", "email": "example@gmail.com", "department": "Administración", "phoneNumber": "555-3456", "address": "Calle Sol 789", "status": "activo", "role": "Employee" },
+    { "id_employee": 5, "employeeName": "Carlos González", "email": "example@gmail.com", "department": "Seguridad", "phoneNumber": "555-7890", "address": "Calle Estrella 321", "status": "activo", "role": "Employee" },
+    { "id_employee": 6, "employeeName": "Ana Torres", "email": "example@gmail.com", "department": "Recepción", "phoneNumber": "555-2345", "address": "Calle Primavera 111", "status": "activo","role": "Employee" },
+    { "id_employee": 7, "employeeName": "Roberto Gómez", "email": "example@gmail.com", "department": "Cocina", "phoneNumber": "555-6789", "address": "Avenida Otoño 222", "status": "activo", "role": "Employee" },
     { "id_employee": 8, "employeeName": "Laura Sánchez", "email": "laura.sanchez@example.com", "department": "Ventas", "phoneNumber": "555-5678", "address": "Calle Invierno 333", "status": "activo", "role": "Employee" },
     { "id_employee": 9, "employeeName": "Luis Morales", "email": "luis.morales@example.com", "department": "Almacén", "phoneNumber": "555-9012", "address": "Avenida Verano 444", "status": "activo", "role": "Employee" },
     { "id_employee": 10, "employeeName": "Elena Castillo", "email": "elena.castillo@example.com", "department": "Administración", "phoneNumber": "555-3456", "address": "Calle Amanecer 555", "status": "activo", "role": "Employee" },
