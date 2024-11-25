@@ -7,7 +7,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 
 const employeeRoutes = require('./modules/employees/routes/employeeRoutes'); // Rutas de empleados
-const authRouter = require('./modules/auth/authRouter'); // Rutas de autenticación
+const authRouter = require('../modules/auth/authRouter'); // Rutas de autenticación
 
 const app = express();
 const PORT = process.env.PORT || 3000;

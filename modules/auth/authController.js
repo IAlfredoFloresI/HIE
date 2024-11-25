@@ -1,4 +1,4 @@
-const authService = require('./authService');
+const authService = require('../authService');
 const employeeRepository = require('../employees/repositories/employeeRepository');
 const bcrypt = require('bcrypt');
 const { sendPasswordChangeConfirmation } = require('../../helpers/emailSender');
