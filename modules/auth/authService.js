@@ -1,6 +1,6 @@
 // auth/authService.js
 const bcrypt = require('bcrypt');
-const jwtHelper = require('./jwtHelper');
+const jwtHelper = require('../jwtHelper');
 const employeeRepository = require('../employees/repositories/employeeRepository');
 const { sendEmail } = require('../../helpers/emailSender');
 const crypto = require('crypto');
