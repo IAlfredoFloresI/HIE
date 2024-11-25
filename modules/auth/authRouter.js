@@ -1,5 +1,5 @@
 const express = require('express');
-const authController = require('../authController');
+const authController = require('./authController');
 const authenticate = require('../../middlewares/authenticate'); // Middleware para verificar el token JWT
 
 const router = express.Router();
