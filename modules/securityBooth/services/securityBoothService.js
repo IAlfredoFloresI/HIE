@@ -2,21 +2,32 @@ const securityBoothRepository = require('../repositories/securityBoothRepository
 const moment = require('moment');
 
 // Registrar una acción (Check-in o Check-out)
-const registerAction = async ({ id_employee, action }) => {
+const registerAction = async ({ id_employee }) => {
+    console.log(`Procesando acción para empleado: ${id_employee}`);
+
     const currentDate = moment().format('YYYY-MM-DD');
     const currentTime = moment().format('HH:mm:ss');
 
-    // Si no se especifica acción, determinar automáticamente
-    if (!action) {
-        const hasOpenCheckIn = await securityBoothRepository.hasOpenCheckIn(id_employee);
-        action = hasOpenCheckIn ? 'checkout' : 'checkin';
+    // Determinar automáticamente la acción
+    console.log('Determinando acción automáticamente...');
+    const hasOpenCheckIn = await securityBoothRepository.hasOpenCheckIn(id_employee);
+    const action = hasOpenCheckIn ? 'checkout' : 'checkin';
+
+    console.log(`Acción determinada automáticamente: ${action}`);
+
+    // Validar que no haya duplicados
+    if (action === 'checkin' && hasOpenCheckIn) {
+        throw new Error('Ya existe un check-in sin check-out correspondiente. No se puede registrar otro check-in.');
     }
 
     // Registrar la acción en la base de datos
+    console.log('Llamando a securityBoothRepository.addAction...');
     await securityBoothRepository.addAction(id_employee, action, currentDate, currentTime);
+    console.log('Acción registrada exitosamente.');
 
     return { id_employee, action, record_date: currentDate, record_time: currentTime };
 };
+
 
 // Obtener registros con Check-in, Check-out y "Pendiente"
 const getRecords = async ({ start_date, end_date, department, id_employee }) => {
