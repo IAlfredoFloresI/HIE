@@ -10,9 +10,14 @@ const registerAction = async (req, res) => {
             return res.status(400).json({ message: 'Falta el campo obligatorio id_employee.' });
         }
 
+        if (action && !['checkin', 'checkout'].includes(action)) {
+            return res.status(400).json({ message: 'Acción no válida. Debe ser checkin o checkout.' });
+        }
+
         const record = await securityBoothService.registerAction({ id_employee, action });
         res.status(201).json(record);
     } catch (error) {
+        console.error('Error en registerAction:', error.message);
         res.status(400).json({ message: `Error al registrar acción: ${error.message}` });
     }
 };
