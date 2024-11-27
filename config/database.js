@@ -10,10 +10,10 @@ const employees = [
     { "id_employee": 1, "employeeName": "Juan Pérez", "email": "cuentateest0@gmail.com", "department": "Recepción", "phoneNumber": "555-1234", "address": "Calle Falsa 123", "status": "activo", "role": "Admin" },
     { "id_employee": 2, "employeeName": "María López", "email": "eduardoflores121298@gmail.com", "department": "Cocina", "phoneNumber": "555-5678", "address": "Avenida Siempre Viva 742", "status": "activo", "role": "Admin" },
     { "id_employee": 3, "employeeName": "Pedro Ramírez", "email": "segufians@gmail.com", "department": "Mantenimiento", "phoneNumber": "555-9012", "address": "Calle Luna 456", "status": "activo", "role": "Employee" },
-    { "id_employee": 4, "employeeName": "Lucía Fernández", "email": "example@gmail.com", "department": "Administración", "phoneNumber": "555-3456", "address": "Calle Sol 789", "status": "activo", "role": "Employee" },
-    { "id_employee": 5, "employeeName": "Carlos González", "email": "example@gmail.com", "department": "Seguridad", "phoneNumber": "555-7890", "address": "Calle Estrella 321", "status": "activo", "role": "Employee" },
-    { "id_employee": 6, "employeeName": "Ana Torres", "email": "example@gmail.com", "department": "Recepción", "phoneNumber": "555-2345", "address": "Calle Primavera 111", "status": "activo","role": "Employee" },
-    { "id_employee": 7, "employeeName": "Roberto Gómez", "email": "example@gmail.com", "department": "Cocina", "phoneNumber": "555-6789", "address": "Avenida Otoño 222", "status": "activo", "role": "Employee" },
+    { "id_employee": 4, "employeeName": "Lucía Fernández", "email": "example1@gmail.com", "department": "Administración", "phoneNumber": "555-3456", "address": "Calle Sol 789", "status": "activo", "role": "Employee" },
+    { "id_employee": 5, "employeeName": "Carlos González", "email": "example2@gmail.com", "department": "Seguridad", "phoneNumber": "555-7890", "address": "Calle Estrella 321", "status": "activo", "role": "Employee" },
+    { "id_employee": 6, "employeeName": "Ana Torres", "email": "example3@gmail.com", "department": "Recepción", "phoneNumber": "555-2345", "address": "Calle Primavera 111", "status": "activo","role": "Employee" },
+    { "id_employee": 7, "employeeName": "Roberto Gómez", "email": "exampl4e@gmail.com", "department": "Cocina", "phoneNumber": "555-6789", "address": "Avenida Otoño 222", "status": "activo", "role": "Employee" },
     { "id_employee": 8, "employeeName": "Laura Sánchez", "email": "laura.sanchez@example.com", "department": "Ventas", "phoneNumber": "555-5678", "address": "Calle Invierno 333", "status": "activo", "role": "Employee" },
     { "id_employee": 9, "employeeName": "Luis Morales", "email": "luis.morales@example.com", "department": "Almacén", "phoneNumber": "555-9012", "address": "Avenida Verano 444", "status": "activo", "role": "Employee" },
     { "id_employee": 10, "employeeName": "Elena Castillo", "email": "elena.castillo@example.com", "department": "Administración", "phoneNumber": "555-3456", "address": "Calle Amanecer 555", "status": "activo", "role": "Employee" },
@@ -60,46 +60,74 @@ async function initializeDatabase() {
 
         console.log('Conexión establecida con la base de datos.');
 
-        // Crear la tabla si no existe
+        // Crear la tabla de empleados si no existe
         await db.exec(`
             CREATE TABLE IF NOT EXISTS employees (
                 id_employee INTEGER PRIMARY KEY,
                 employeeName TEXT NOT NULL,
-                email TEXT NOT NULL, -- El correo no tiene restricción UNIQUE
+                email TEXT NOT NULL UNIQUE, -- El correo debe ser único
                 department TEXT NOT NULL,
                 phoneNumber TEXT,
                 address TEXT,
                 status TEXT CHECK(status IN ('activo', 'baja')) NOT NULL,
-                password TEXT NOT NULL, -- Contraseña cifrada
+                password TEXT NOT NULL,
                 role TEXT CHECK(role IN ('Admin', 'Employee')) NOT NULL,
-                force_password_reset BOOLEAN DEFAULT false, -- Obligatorio cambiar contraseña
+                force_password_reset BOOLEAN DEFAULT false,
                 deleted_at TEXT,
-                qr_enabled BOOLEAN DEFAULT true -- Estado de habilitación del QR
+                qr_enabled BOOLEAN DEFAULT true
             )
         `);
         console.log('Tabla "employees" verificada/existente.');
 
-        // Crear tabla para los tokens de restablecimiento de contraseña
+        // Verificar si la tabla "employees" ya tiene datos
+        const { count: employeeCount } = await db.get('SELECT COUNT(*) AS count FROM employees');
+        if (employeeCount === 0) {
+            console.log('La tabla "employees" está vacía. Insertando datos iniciales...');
+            await insertInitialEmployees(db);
+        } else {
+            console.log(`La tabla "employees" ya contiene ${employeeCount} registros.`);
+        }
+
+        // Crear la tabla de tokens de restablecimiento si no existe
         await db.exec(`
             CREATE TABLE IF NOT EXISTS password_reset_tokens (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 id_employee INTEGER NOT NULL,
-                token TEXT NOT NULL,
+                token TEXT NOT NULL UNIQUE, -- Token debe ser único
                 expiration TEXT NOT NULL,
                 FOREIGN KEY (id_employee) REFERENCES employees(id_employee)
-            );
+            )
         `);
-
         console.log('Tabla "password_reset_tokens" verificada/existente.');
 
-        // Verificar si la tabla ya tiene datos
-        const { count } = await db.get('SELECT COUNT(*) AS count FROM employees');
-
-        if (count === 0) {
-            console.log('La tabla "employees" está vacía. Insertando datos iniciales...');
-            await insertInitialEmployees(db); // Insertar empleados iniciales
+        // Verificar si la tabla "password_reset_tokens" ya tiene datos
+        const { count: tokenCount } = await db.get('SELECT COUNT(*) AS count FROM password_reset_tokens');
+        if (tokenCount === 0) {
+            console.log('La tabla "password_reset_tokens" está vacía. No se requiere inicialización.');
         } else {
-            console.log(`La tabla "employees" ya contiene ${count} registros.`);
+            console.log(`La tabla "password_reset_tokens" ya contiene ${tokenCount} registros.`);
+        }
+
+        // Crear la tabla de check-in y check-out si no existe
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS checkin_checkout_records (
+                id_record INTEGER PRIMARY KEY AUTOINCREMENT,
+                id_employee INTEGER NOT NULL,
+                action TEXT CHECK(action IN ('checkin', 'checkout')) NOT NULL,
+                record_date TEXT NOT NULL, -- Fecha en formato YYYY-MM-DD
+                record_time TEXT NOT NULL, -- Hora en formato HH:MM:SS
+                UNIQUE(id_employee, record_date, record_time, action), -- Prevenir duplicados
+                FOREIGN KEY (id_employee) REFERENCES employees(id_employee)
+            )
+        `);
+        console.log('Tabla "checkin_checkout_records" verificada/existente.');
+
+        // Verificar si la tabla "checkin_checkout_records" ya tiene datos
+        const { count: recordCount } = await db.get('SELECT COUNT(*) AS count FROM checkin_checkout_records');
+        if (recordCount === 0) {
+            console.log('La tabla "checkin_checkout_records" está vacía. No se requiere inicialización.');
+        } else {
+            console.log(`La tabla "checkin_checkout_records" ya contiene ${recordCount} registros.`);
         }
     } catch (error) {
         console.error('Error al inicializar la base de datos:', error.message);
