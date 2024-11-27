@@ -76,7 +76,11 @@ const swaggerOptions = {
             }
         ]
     },
-    apis: ['./modules/employees/routes/*.js', './modules/auth/authRouter.js'], // Rutas a los archivos de Swagger
+    apis: [
+        './modules/employees/routes/*.js', 
+        './modules/auth/authRouter.js', 
+        './modules/securityBooth/routes/*.js' // Asegúrate de incluir las rutas de Security Booth
+    ], // Rutas a los archivos de Swagger
 };
 
 // Generación de la documentación Swagger

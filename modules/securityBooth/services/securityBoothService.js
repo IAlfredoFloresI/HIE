@@ -12,6 +12,7 @@ const registerAction = async ({ id_employee, action }) => {
         action = hasOpenCheckIn ? 'checkout' : 'checkin';
     }
 
+    // Registrar la acción en la base de datos
     await securityBoothRepository.addAction(id_employee, action, currentDate, currentTime);
 
     return { id_employee, action, record_date: currentDate, record_time: currentTime };

@@ -1,6 +1,7 @@
 const express = require('express');
 const securityBoothController = require('../controllers/securityBoothController');
 const authenticate = require('../../../middlewares/authenticate');
+const { authorize } = require('../../../middlewares/authorize');
 const router = express.Router();
 
 /**
@@ -12,9 +13,9 @@ const router = express.Router();
 
 /**
  * @swagger
- * /securityBooth/action:
+ * /securityBooth/register:
  *   post:
- *     summary: Registrar Check-in o Check-out
+ *     summary: Registrar Check-in o Check-out vía QR
  *     tags: [Security Booth]
  *     requestBody:
  *       required: true
@@ -25,9 +26,11 @@ const router = express.Router();
  *             properties:
  *               id_employee:
  *                 type: integer
+ *                 description: ID del empleado escaneado del QR
  *               action:
  *                 type: string
  *                 enum: [checkin, checkout]
+ *                 description: Acción opcional; si no se envía, se determina automáticamente
  *     responses:
  *       201:
  *         description: Registro creado exitosamente
@@ -36,13 +39,13 @@ const router = express.Router();
  *       500:
  *         description: Error interno
  */
-router.post('/action', authenticate, securityBoothController.registerAction);
+router.post('/register', securityBoothController.registerAction);
 
 /**
  * @swagger
  * /securityBooth/records:
  *   get:
- *     summary: Obtener registros de Check-in/Check-out
+ *     summary: Obtener registros de Check-in/Check-out con filtros (Admin Only)
  *     tags: [Security Booth]
  *     parameters:
  *       - in: query
@@ -92,13 +95,13 @@ router.post('/action', authenticate, securityBoothController.registerAction);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/records', securityBoothController.getRecords);
+router.get('/records', authenticate, authorize(['Admin']), securityBoothController.getRecords);
 
 /**
  * @swagger
  * /securityBooth/employees-checked-in:
  *   get:
- *     summary: Obtener empleados actualmente en el edificio
+ *     summary: Obtener empleados actualmente en el edificio (Admin Only)
  *     tags: [Security Booth]
  *     responses:
  *       200:
@@ -106,7 +109,7 @@ router.get('/records', securityBoothController.getRecords);
  *       500:
  *         description: Error interno
  */
-router.get('/employees-checked-in', authenticate, securityBoothController.getEmployeesCheckedIn);
+router.get('/employees-checked-in', authenticate, authorize(['Admin']), securityBoothController.getEmployeesCheckedIn);
 
 /**
  * @swagger
@@ -126,6 +129,6 @@ router.get('/employees-checked-in', authenticate, securityBoothController.getEmp
  *       500:
  *         description: Error interno
  */
-router.get('/history/:id_employee', authenticate, securityBoothController.getEmployeeHistory);
+router.get('/history/:id_employee', authenticate, authorize(['Employee', 'Admin']), securityBoothController.getEmployeeHistory);
 
 module.exports = router;
