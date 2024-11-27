@@ -2,17 +2,13 @@ const { openDatabase } = require('../../../config/database');
 
 // Insertar un registro de acción (Check-in o Check-out)
 const addAction = async (id_employee, action, record_date, record_time) => {
-    console.log('Llamando a openDatabase para agregar acción...');
     const db = await openDatabase();
 
-    // Validar si ya existe un registro igual (opcional, ya debería estar controlado en el servicio)
+    // Validar si ya existe un registro igual
     const exists = await db.get(`
         SELECT 1 
         FROM checkin_checkout_records
-        WHERE id_employee = ? 
-        AND action = ? 
-        AND record_date = ? 
-        AND record_time = ?
+        WHERE id_employee = ? AND action = ? AND record_date = ? AND record_time = ?
     `, [id_employee, action, record_date, record_time]);
 
     if (exists) {
@@ -21,35 +17,33 @@ const addAction = async (id_employee, action, record_date, record_time) => {
         return; // No registrar duplicados
     }
 
-    console.log('Conexión establecida, ejecutando consulta...');
-    await db.run(
-        `INSERT INTO checkin_checkout_records (id_employee, action, record_date, record_time) 
-         VALUES (?, ?, ?, ?)`,
-        [id_employee, action, record_date, record_time]
-    );
-    console.log('Consulta ejecutada exitosamente.');
+    // Insertar el registro
+    await db.run(`
+        INSERT INTO checkin_checkout_records (id_employee, action, record_date, record_time) 
+        VALUES (?, ?, ?, ?)
+    `, [id_employee, action, record_date, record_time]);
+
+    console.log('Registro agregado exitosamente.');
     await db.close();
-    console.log('Conexión cerrada.');
 };
 
 // Validar si existe un Check-in sin Check-out
 const hasOpenCheckIn = async (id_employee) => {
-    const database = await openDatabase();
-    const result = await database.get(`
-        SELECT 1
+    const db = await openDatabase();
+
+    // Buscar el último registro del empleado
+    const lastRecord = await db.get(`
+        SELECT action
         FROM checkin_checkout_records
-        WHERE id_employee = ? 
-        AND action = 'checkin'
-        AND NOT EXISTS (
-            SELECT 1 
-            FROM checkin_checkout_records
-            WHERE id_employee = ? 
-            AND action = 'checkout'
-            AND record_date = checkin_checkout_records.record_date
-        )
-    `, [id_employee, id_employee]);
-    await database.close();
-    return !!result; // Devuelve true si hay un Check-in sin Check-out
+        WHERE id_employee = ?
+        ORDER BY record_date DESC, record_time DESC
+        LIMIT 1
+    `, [id_employee]);
+
+    await db.close();
+
+    // Si el último registro es un 'checkin', hay un pendiente
+    return lastRecord && lastRecord.action === 'checkin';
 };
 
 // Obtener registros con filtros

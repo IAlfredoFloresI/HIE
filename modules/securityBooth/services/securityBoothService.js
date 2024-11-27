@@ -15,11 +15,6 @@ const registerAction = async ({ id_employee }) => {
 
     console.log(`Acción determinada automáticamente: ${action}`);
 
-    // Validar que no haya duplicados
-    if (action === 'checkin' && hasOpenCheckIn) {
-        throw new Error('Ya existe un check-in sin check-out correspondiente. No se puede registrar otro check-in.');
-    }
-
     // Registrar la acción en la base de datos
     console.log('Llamando a securityBoothRepository.addAction...');
     await securityBoothRepository.addAction(id_employee, action, currentDate, currentTime);
@@ -27,7 +22,6 @@ const registerAction = async ({ id_employee }) => {
 
     return { id_employee, action, record_date: currentDate, record_time: currentTime };
 };
-
 
 // Obtener registros con Check-in, Check-out y "Pendiente"
 const getRecords = async ({ start_date, end_date, department, id_employee }) => {
