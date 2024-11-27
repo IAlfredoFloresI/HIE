@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /securityBooth/register:
+ * /api/securityBooth/register:
  *   post:
  *     summary: Registrar Check-in o Check-out vía QR
  *     tags: [Security Booth]
@@ -43,7 +43,7 @@ router.post('/register', securityBoothController.registerAction);
 
 /**
  * @swagger
- * /securityBooth/records:
+ * /api/securityBooth/records:
  *   get:
  *     summary: Obtener registros de Check-in/Check-out con filtros (Admin Only)
  *     tags: [Security Booth]
@@ -99,7 +99,7 @@ router.get('/records', authenticate, authorize(['Admin']), securityBoothControll
 
 /**
  * @swagger
- * /securityBooth/employees-checked-in:
+ * /api/securityBooth/employees-checked-in:
  *   get:
  *     summary: Obtener empleados actualmente en el edificio (Admin Only)
  *     tags: [Security Booth]
@@ -113,7 +113,7 @@ router.get('/employees-checked-in', authenticate, authorize(['Admin']), security
 
 /**
  * @swagger
- * /securityBooth/history/{id_employee}:
+ * /api/securityBooth/history/{id_employee}:
  *   get:
  *     summary: Obtener historial de un empleado
  *     tags: [Security Booth]
