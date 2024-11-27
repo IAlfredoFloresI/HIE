@@ -48,6 +48,16 @@ const employees = [
     { "id_employee": 39, "employeeName": "Mónica Medina", "email": "monica.medina@example.com", "department": "Mantenimiento", "phoneNumber": "", "address": "", "status": "activo", "role": "Employee" }
 ];
 
+async function openDatabase() {
+    console.log('Abriendo base de datos...'); // Mensaje de inicio
+    const db = await open({
+        filename: './database.db',
+        driver: sqlite3.Database
+    });
+    console.log('Base de datos abierta exitosamente.'); // Confirmación
+    return db;
+}
+
 // Función para inicializar la base de datos
 async function initializeDatabase() {
     let db;
@@ -207,7 +217,10 @@ El equipo de Holiday Inn Express.
 }
 
 // Exportar la función para inicializar la base de datos
-module.exports = initializeDatabase;
+module.exports = { 
+    initializeDatabase, 
+    openDatabase 
+};
 
 // Llamada a la función para inicializar la base de datos
 initializeDatabase().catch(err => {

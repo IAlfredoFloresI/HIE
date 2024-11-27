@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const swaggerJsDoc = require('swagger-jsdoc');
@@ -8,15 +9,11 @@ const morgan = require('morgan');
 
 const employeeRoutes = require('./modules/employees/routes/employeeRoutes'); // Rutas de empleados
 const authRouter = require('./modules/auth/authRouter'); // Rutas de autenticación
+const securityBoothRoutes = require('./modules/securityBooth/routes/securityBoothRoutes');
+const debugRoutes = require('./modules/debugRoutes'); // Importa la ruta de depuración
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-const debugRoutes = require('./modules/debugRoutes'); // Importa la ruta de depuración
-app.use('/debug', debugRoutes); // Usa el prefijo "/debug" para acceder al endpoint
-
-const securityBoothRoutes = require('./modules/securityBooth/routes/securityBoothRoutes');
-app.use('/api/securityBooth', securityBoothRoutes);
 
 // Middleware para CORS
 const corsOptions = {
@@ -54,32 +51,32 @@ const swaggerOptions = {
         servers: [
             {
                 url: 'https://hie-3f29.onrender.com',
-                description: 'Servidor de producción'
+                description: 'Servidor de producción',
             },
             {
                 url: 'http://localhost:3000',
-                description: 'Servidor local'
-            }
+                description: 'Servidor local',
+            },
         ],
         components: {
             securitySchemes: {
                 bearerAuth: {
                     type: 'http',
                     scheme: 'bearer',
-                    bearerFormat: 'JWT'
-                }
-            }
+                    bearerFormat: 'JWT',
+                },
+            },
         },
         security: [
             {
-                bearerAuth: []
-            }
-        ]
+                bearerAuth: [],
+            },
+        ],
     },
     apis: [
-        './modules/employees/routes/*.js', 
-        './modules/auth/authRouter.js', 
-        './modules/securityBooth/routes/*.js' // Asegúrate de incluir las rutas de Security Booth
+        './modules/employees/routes/*.js',
+        './modules/auth/authRouter.js',
+        './modules/securityBooth/routes/*.js', // Asegúrate de incluir las rutas de Security Booth
     ], // Rutas a los archivos de Swagger
 };
 
@@ -87,23 +84,24 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Rutas de la API de empleados
-app.use('/api/employees', employeeRoutes);
+// 5. Definición de rutas principales
+app.use('/debug', debugRoutes); // Rutas de depuración
+app.use('/auth', authRouter); // Rutas de autenticación
+app.use('/api/employees', employeeRoutes); // Rutas de empleados
+app.use('/api/securityBooth', securityBoothRoutes); // Rutas de Security Booth
 
-// Manejo de rutas no encontradas
+// 6. Manejo de rutas no encontradas
 app.use((req, res) => {
     res.status(404).json({ message: 'Ruta no encontrada' });
 });
 
-// Manejo de errores
+// 7. Manejo de errores global
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ message: 'Error interno del servidor' });
 });
 
-// Iniciar servidor
+// 8. Iniciar servidor
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
-
-// Prueba rama eduardo

@@ -3,21 +3,20 @@ const securityBoothService = require('../services/securityBoothService');
 // Registrar una acción (Check-in o Check-out)
 const registerAction = async (req, res) => {
     try {
+        console.log('Datos recibidos en el controlador:', req.body);
         const { id_employee, action } = req.body;
 
-        // Validar campos
         if (!id_employee) {
+            console.log('Error: Faltan campos obligatorios.');
             return res.status(400).json({ message: 'Falta el campo obligatorio id_employee.' });
         }
 
-        if (action && !['checkin', 'checkout'].includes(action)) {
-            return res.status(400).json({ message: 'Acción no válida. Debe ser checkin o checkout.' });
-        }
-
+        console.log('Llamando a securityBoothService.registerAction...');
         const record = await securityBoothService.registerAction({ id_employee, action });
+        console.log('Acción registrada exitosamente:', record);
         res.status(201).json(record);
     } catch (error) {
-        console.error('Error en registerAction:', error.message);
+        console.error('Error en el controlador:', error.message);
         res.status(400).json({ message: `Error al registrar acción: ${error.message}` });
     }
 };
