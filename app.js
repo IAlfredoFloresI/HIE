@@ -15,6 +15,9 @@ const PORT = process.env.PORT || 3000;
 const debugRoutes = require('./modules/debugRoutes'); // Importa la ruta de depuración
 app.use('/debug', debugRoutes); // Usa el prefijo "/debug" para acceder al endpoint
 
+const securityBoothRoutes = require('./modules/securityBooth/routes/securityBoothRoutes');
+app.use('/api/securityBooth', securityBoothRoutes);
+
 // Middleware para CORS
 const corsOptions = {
     origin:'*',  //['http://localhost:3000', 'http://187.189.0.114', 'http://127.0.0.1:5501/'], // Orígenes permitidos
