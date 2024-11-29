@@ -55,7 +55,14 @@ const getEmployeeById = async (req, res) => {
 // Actualizar un empleado
 const updateEmployee = async (req, res) => {
     try {
-        const updatedEmployee = await employeeService.updateEmployee(req.params.id_employee, req.body);
+        const { status, ...updateFields } = req.body;
+
+        // Advertir si el cliente intenta actualizar `status`
+        if (status) {
+            return res.status(400).json({ message: 'El campo "status" no se puede actualizar manualmente.' });
+        }
+
+        const updatedEmployee = await employeeService.updateEmployee(req.params.id_employee, updateFields);
 
         if (!updatedEmployee) {
             return res.status(404).json({ message: 'Empleado no encontrado' });
@@ -66,6 +73,7 @@ const updateEmployee = async (req, res) => {
         res.status(400).json({ message: `Error al actualizar empleado: ${error.message}` });
     }
 };
+
 
 // Eliminar un empleado (cambiar su estado a baja)
 const deleteEmployee = async (req, res) => {

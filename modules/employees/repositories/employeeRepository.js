@@ -118,14 +118,14 @@ const updatePassword = async (id_employee, hashedPassword) => {
 
 // **Actualizar un empleado**
 const updateEmployee = async (id_employee, employee) => {
-    const { employeeName, email, department, phoneNumber, address, status } = employee;
+    const { employeeName, email, department, phoneNumber, address } = employee;
 
     const database = await db.openDatabase();
     const result = await database.run(
         `UPDATE employees 
-         SET employeeName = ?, email = ?, department = ?, phoneNumber = ?, address = ?, status = ? 
+         SET employeeName = ?, email = ?, department = ?, phoneNumber = ?, address = ?
          WHERE id_employee = ?`,
-        [employeeName, email, department, phoneNumber, address, status, id_employee]
+        [employeeName, email, department, phoneNumber, address, id_employee]
     );
 
     await database.close();

@@ -5,6 +5,12 @@ const moment = require('moment');
 const registerAction = async ({ id_employee }) => {
     console.log(`Procesando acción para empleado: ${id_employee}`);
 
+    // Verificar si el empleado existe
+    const employeeExists = await securityBoothRepository.employeeExists(id_employee);
+    if (!employeeExists) {
+        throw new Error(`El empleado con ID ${id_employee} no existe.`);
+    }
+
     const currentDate = moment().format('YYYY-MM-DD');
     const currentTime = moment().format('HH:mm:ss');
 
@@ -15,11 +21,6 @@ const registerAction = async ({ id_employee }) => {
 
     console.log(`Acción determinada automáticamente: ${action}`);
 
-    // Validar que no haya duplicados
-    if (action === 'checkin' && hasOpenCheckIn) {
-        throw new Error('Ya existe un check-in sin check-out correspondiente. No se puede registrar otro check-in.');
-    }
-
     // Registrar la acción en la base de datos
     console.log('Llamando a securityBoothRepository.addAction...');
     await securityBoothRepository.addAction(id_employee, action, currentDate, currentTime);
@@ -27,7 +28,6 @@ const registerAction = async ({ id_employee }) => {
 
     return { id_employee, action, record_date: currentDate, record_time: currentTime };
 };
-
 
 // Obtener registros con Check-in, Check-out y "Pendiente"
 const getRecords = async ({ start_date, end_date, department, id_employee }) => {

@@ -80,7 +80,10 @@ const addEmployee = async (employee) => {
 // Actualizar un empleado
 const updateEmployee = async (id_employee, employee) => {
     try {
-        const updatedEmployee = await employeeRepository.updateEmployee(id_employee, employee);
+        // Eliminar `status` si está presente, para evitar cambios accidentales
+        const { status, ...modifiableFields } = employee;
+
+        const updatedEmployee = await employeeRepository.updateEmployee(id_employee, modifiableFields);
         if (!updatedEmployee) {
             throw new Error('Empleado no encontrado');
         }
@@ -89,6 +92,7 @@ const updateEmployee = async (id_employee, employee) => {
         throw new Error(`Error al actualizar empleado: ${error.message}`);
     }
 };
+
 
 // Actualizar la contraseña del empleado
 const updatePassword = async (id_employee, newPassword) => {
