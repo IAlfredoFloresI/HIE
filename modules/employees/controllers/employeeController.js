@@ -1,6 +1,7 @@
 const employeeService = require('../services/employeeService');
 const QRCode = require('qrcode'); // Para generar QR
 const employeeRepository = require('../repositories/employeeRepository');
+const securityBoothRepository = require('../../securityBooth/repositories/securityBoothRepository');
 
 // Obtener empleados con paginación y filtros
 const getEmployeesWithPaginationAndFilters = async (req, res) => {
@@ -90,21 +91,6 @@ const deleteEmployee = async (req, res) => {
     }
 };
 
-// Obtener perfil del empleado basado en su ID en el token JWT
-const getProfile = async (req, res) => {
-    try {
-        const employee = await employeeService.getEmployeeById(req.user.id);
-
-        if (!employee) {
-            return res.status(404).json({ message: 'Empleado no encontrado' });
-        }
-
-        res.status(200).json(employee);
-    } catch (error) {
-        res.status(500).json({ message: `Error al obtener el perfil: ${error.message}` });
-    }
-};
-
 // Actualizar la contraseña del empleado
 const updatePassword = async (req, res) => {
     try {
@@ -179,6 +165,73 @@ const toggleQRState = async (req, res) => {
     }
 };
 
+// Obtener perfil del empleado basado en su ID en el token JWT
+const getProfile = async (req, res) => {
+    try {
+        const userId = req.user.id; // ID del usuario desde el token
+        const userRole = req.user.role; // Rol del usuario
+
+        // Obtener información del empleado
+        const employee = await employeeRepository.getEmployeeById(userId);
+        if (!employee) {
+            return res.status(404).json({ message: 'Empleado no encontrado.' });
+        }
+
+        // Obtener el último movimiento de check-in o check-out
+        const lastAction = await securityBoothRepository.getLastActionByEmployee(userId);
+
+        // Generar el contenido del QR
+        const qrContent = `empleado-id:${userId}`;
+        
+        // Generar QR como imagen Base64
+        const qrImage = await QRCode.toDataURL(qrContent);
+
+        // Generar respuesta
+        const profile = {
+            name: employee.employeeName,
+            role: userRole,
+            qr: qrImage, // Imagen QR en formato Base64
+            status: lastAction
+                ? `${lastAction.action} - ${lastAction.record_date} ${lastAction.record_time}`
+                : 'Sin movimientos',
+        };
+
+        res.status(200).json(profile);
+    } catch (error) {
+        console.error(`Error al obtener el perfil: ${error.message}`);
+        res.status(500).json({ message: `Error al obtener el perfil: ${error.message}` });
+    }
+};
+
+// Generar y descargar reportes en formato PDF
+const generateReport = async (req, res) => {
+    try {
+        const userId = req.user.id; // ID del usuario desde el token
+        const { period } = req.query; // Período (quincena, mes, etc.)
+
+        // Validar período
+        if (!period) {
+            return res.status(400).json({ message: 'Período es obligatorio (quincena, mes).' });
+        }
+
+        // Obtener registros del período
+        const records = await securityBoothRepository.getRecordsByPeriod(userId, period);
+        if (!records.length) {
+            return res.status(404).json({ message: 'No hay registros para este período.' });
+        }
+
+        // Generar PDF
+        const pdf = await pdfGenerator.generateAttendanceReport(employee.employeeName, records);
+
+        // Enviar PDF como respuesta
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=report-${period}.pdf`);
+        res.send(pdf);
+    } catch (error) {
+        res.status(500).json({ message: `Error al generar el reporte: ${error.message}` });
+    }
+};
+
 module.exports = {
     getEmployeesWithPaginationAndFilters,
     createEmployee,
@@ -188,5 +241,7 @@ module.exports = {
     getProfile,
     updatePassword, // Nueva función exportada
     generateQR, 
-    toggleQRState ,
+    toggleQRState,
+    getProfile,
+    generateReport,
 };
