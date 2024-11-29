@@ -5,6 +5,12 @@ const moment = require('moment');
 const registerAction = async ({ id_employee }) => {
     console.log(`Procesando acción para empleado: ${id_employee}`);
 
+    // Verificar si el empleado existe
+    const employeeExists = await securityBoothRepository.employeeExists(id_employee);
+    if (!employeeExists) {
+        throw new Error(`El empleado con ID ${id_employee} no existe.`);
+    }
+
     const currentDate = moment().format('YYYY-MM-DD');
     const currentTime = moment().format('HH:mm:ss');
 

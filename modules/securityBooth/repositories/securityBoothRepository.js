@@ -1,5 +1,20 @@
 const { openDatabase } = require('../../../config/database');
 
+// Verificar si el empleado existe
+const employeeExists = async (id_employee) => {
+    const db = await openDatabase();
+    try {
+        const result = await db.get(`
+            SELECT 1 
+            FROM employees 
+            WHERE id_employee = ?
+        `, [id_employee]);
+        return !!result; // Devuelve true si existe, false si no
+    } finally {
+        await db.close();
+    }
+};
+
 // Insertar un registro de acción (Check-in o Check-out)
 const addAction = async (id_employee, action, record_date, record_time) => {
     const db = await openDatabase();
@@ -150,4 +165,5 @@ module.exports = {
     getEmployeesCurrentlyCheckedIn,
     getRecordsByEmployee,
     getRecordsWithPendingCheckouts,
+    employeeExists,
 };

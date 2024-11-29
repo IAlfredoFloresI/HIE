@@ -4,7 +4,7 @@ const securityBoothService = require('../services/securityBoothService');
 const registerAction = async (req, res) => {
     try {
         console.log('Datos recibidos en el controlador:', req.body);
-        const { id_employee, action } = req.body;
+        const { id_employee } = req.body;
 
         if (!id_employee) {
             console.log('Error: Faltan campos obligatorios.');
@@ -12,7 +12,7 @@ const registerAction = async (req, res) => {
         }
 
         console.log('Llamando a securityBoothService.registerAction...');
-        const record = await securityBoothService.registerAction({ id_employee, action });
+        const record = await securityBoothService.registerAction({ id_employee });
         console.log('Acción registrada exitosamente:', record);
         res.status(201).json(record);
     } catch (error) {
