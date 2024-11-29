@@ -158,7 +158,37 @@ const getRecordsWithPendingCheckouts = async ({ start_date, end_date, department
     }
 };
 
+// Obtener el último movimiento (check-in/check-out) del empleado
+const getLastActionByEmployee = async (id_employee) => {
+    const db = await openDatabase();
+    const result = await db.get(`
+        SELECT action, record_date, record_time
+        FROM checkin_checkout_records
+        WHERE id_employee = ?
+        ORDER BY record_date DESC, record_time DESC
+        LIMIT 1
+    `, [id_employee]);
+    await db.close();
+    return result;
+};
+
+// Obtener registros por período (quincenas o meses)
+const getRecordsByPeriod = async (id_employee, period) => {
+    const db = await openDatabase();
+    const [startDate, endDate] = calculatePeriodRange(period); // Usar el helper
+    const records = await db.all(`
+        SELECT action, record_date, record_time
+        FROM checkin_checkout_records
+        WHERE id_employee = ? AND record_date BETWEEN ? AND ?
+        ORDER BY record_date, record_time
+    `, [id_employee, startDate, endDate]);
+    await db.close();
+    return records;
+};
+
 module.exports = {
+    getLastActionByEmployee,
+    getRecordsByPeriod,
     addAction,
     hasOpenCheckIn,
     getRecords,

@@ -4,6 +4,7 @@ const employeeController = require('../controllers/employeeController');
 const authenticate = require('../../../middlewares/authenticate');
 const { authorize, authorizeDeleteEmployee } = require('../../../middlewares/authorize');
 const forcePasswordReset = require('../../../middlewares/forcePasswordReset');
+const autoLogoutMiddleware = require('../../../middlewares/autoLogoutMiddleware');
 
 /**
  * @swagger
@@ -15,6 +16,7 @@ const forcePasswordReset = require('../../../middlewares/forcePasswordReset');
 // Aplica autenticación a todas las rutas de este archivo
 router.use(authenticate);
 router.use(forcePasswordReset);
+router.use(autoLogoutMiddleware);
 
 
 /**
@@ -264,10 +266,13 @@ router.get('/:id/qr', employeeController.generateQR);
 
 /**
  * @swagger
- * api/employees/{id}/qr-state:
+ * /api/employees/{id}/qr-state:
  *   patch:
- *     summary: Habilitar o deshabilitar el código QR de un empleado
+ *     summary: Habilitar o deshabilitar el código QR de un empleado (Admin only)
  *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Permite a un administrador habilitar o deshabilitar el código QR de un empleado.
  *     parameters:
  *       - in: path
  *         name: id
@@ -284,17 +289,68 @@ router.get('/:id/qr', employeeController.generateQR);
  *             properties:
  *               enabled:
  *                 type: boolean
- *                 description: Estado de habilitación del QR (true para habilitar, false para deshabilitar)
+ *                 description: Estado del QR (true para habilitar, false para deshabilitar)
  *     responses:
  *       200:
- *         description: Estado del QR actualizado exitosamente
+ *         description: Estado del QR actualizado correctamente
  *       400:
  *         description: Error en los datos enviados
  *       404:
  *         description: Empleado no encontrado
  *       500:
- *         description: Error al actualizar el estado del QR
+ *         description: Error interno del servidor
  */
-router.patch('/:id/qr-state', employeeController.toggleQRState);
+router.patch('/:id/qr-state', authorize(['Admin']), employeeController.toggleQRState);
+
+/**
+ * @swagger
+ * /api/employees/profile:
+ *   get:
+ *     summary: Obtener perfil del empleado
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Muestra el perfil del empleado o admin, incluyendo el último check-in/check-out y estatus.
+ *     responses:
+ *       200:
+ *         description: Perfil del empleado obtenido
+ *       401:
+ *         description: No autorizado
+ */
+router.get('/profile', authorize(['Employee', 'Admin']), employeeController.getProfile);
+
+/**
+ * @swagger
+ * /api/employees/profile/report:
+ *   get:
+ *     summary: Descargar reporte de asistencias en formato PDF
+ *     tags: [Employees]
+ *     security:
+ *       - bearerAuth: []
+ *     description: Genera y permite la descarga del reporte de asistencias quincenal o mensual.
+ *     parameters:
+ *       - in: query
+ *         name: period
+ *         schema:
+ *           type: string
+ *           enum: [quincena1, quincena2, mes]
+ *         required: true
+ *         description: Período para el reporte (quincena1, quincena2, mes)
+ *     responses:
+ *       200:
+ *         description: Reporte generado exitosamente
+ *         content:
+ *           application/pdf:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *       400:
+ *         description: Solicitud incorrecta
+ *       404:
+ *         description: No se encontraron registros
+ *       500:
+ *         description: Error interno del servidor
+ */
+router.get('/profile/report', authorize(['Employee', 'Admin']), employeeController.generateReport);
 
 module.exports = router;
