@@ -43,7 +43,7 @@ const requestPasswordReset = async (email) => {
     await employeeRepository.savePasswordResetToken(employee.id_employee, token, expiration);
 
     // Enviar el enlace al correo electrónico
-    const resetLink = `https://miaplicacion.com/reset-password?token=${token}`;
+    const resetLink = `https://atomicum.com/Holliday/Holiday/contraseña_nueva.html?token=${token}`;
     const subject = 'Restablecimiento de contraseña';
     const text = `
 Hola ${employee.employeeName},
