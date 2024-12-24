@@ -147,7 +147,7 @@ router.put('/advertisements/:id', AdvertisementsController.updateAdvertisement);
  */
 router.delete('/advertisements/:id', AdvertisementsController.deleteAdvertisement);
 
-/*
+/**
  * @swagger
  * components:
  *   schemas:
@@ -260,4 +260,5 @@ router.delete('/advertisements/:id', AdvertisementsController.deleteAdvertisemen
  *         expiration_date: "2024-03-15"
  *         departments: "Cocina"
  */
+
 module.exports = router;
