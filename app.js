@@ -11,7 +11,6 @@ const cron = require('node-cron');
 const employeeRoutes = require('./modules/employees/routes/employeeRoutes'); // Rutas de empleados
 const authRouter = require('./modules/auth/authRouter'); // Rutas de autenticación
 const securityBoothRoutes = require('./modules/securityBooth/routes/securityBoothRoutes');
-const debugRoutes = require('./modules/debugRoutes'); // Importa la ruta de depuración
 const advertisement = require('./modules/advertisement/routes/advertisementRoute'); //Importacion de la Ruta de Anuncios
 const AdvertisementsService = require('./modules/advertisement/services/advertisementService');//Importo el servicio de Anuncios, que se usará junto con cron, para cambiar Status
 
@@ -100,7 +99,6 @@ const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // 5. Definición de rutas principales
-app.use('/debug', debugRoutes); // Rutas de depuración
 app.use('/auth', authRouter); // Rutas de autenticación
 app.use('/api/employees', employeeRoutes); // Rutas de empleados
 app.use('/api/securityBooth', securityBoothRoutes); // Rutas de Security Booth
