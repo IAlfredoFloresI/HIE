@@ -1,5 +1,5 @@
 const authService = require('./authService');
-const employeeRepository = require('../employees/repositories/employeeRepository');
+const { revokeToken } = require('./tokenRepository');
 const bcrypt = require('bcrypt');
 const { sendPasswordChangeConfirmation } = require('../../helpers/emailSender');
 
@@ -95,5 +95,27 @@ const resetPassword = async (req, res) => {
     }
 };
 
+/**
+ * Cerrar sesión y revocar el token del usuario.
+ */
+const logout = async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
 
-module.exports = { login, updatePassword, requestPasswordReset, resetPassword };
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(400).json({ message: 'No se proporcionó un token válido.' });
+        }
+
+        const token = authHeader.split(' ')[1]; // Extraer el token del encabezado
+
+        // Revocar el token
+        await revokeToken(token);
+
+        res.status(200).json({ message: 'Sesión cerrada exitosamente.' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al cerrar sesión: ' + error.message });
+    }
+};
+
+
+module.exports = { login, updatePassword, requestPasswordReset, resetPassword, logout };

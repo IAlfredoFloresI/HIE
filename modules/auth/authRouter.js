@@ -129,4 +129,23 @@ router.post('/request-password-reset', authController.requestPasswordReset);
  */
 router.post('/reset-password', authController.resetPassword);
 
+/**
+ * @swagger
+ * /auth/logout:
+ *   post:
+ *     summary: Cerrar sesión
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: [] # Requiere autenticación con token
+ *     responses:
+ *       200:
+ *         description: Sesión cerrada exitosamente.
+ *       400:
+ *         description: No se proporcionó un token válido.
+ *       500:
+ *         description: Error del servidor.
+ */
+router.post('/logout', authenticate, authController.logout); // Usa el middleware authenticate
+
+
 module.exports = router;
