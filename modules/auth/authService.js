@@ -1,6 +1,7 @@
 // auth/authService.js
 const bcrypt = require('bcrypt');
 const jwtHelper = require('./jwtHelper');
+const { savePasswordResetToken, getPasswordResetToken, deletePasswordResetToken } = require('./tokenRepository');
 const employeeRepository = require('../employees/repositories/employeeRepository');
 const { sendEmail } = require('../../helpers/emailSender');
 const crypto = require('crypto');
@@ -36,11 +37,12 @@ const requestPasswordReset = async (email) => {
     }
 
     // Generar un token único y establecer su expiración
-    const token = crypto.randomBytes(32).toString('hex');
+    const token = crypto.randomBytes(32).toString('hex'); // Token único
+    const hashedToken = await bcrypt.hash(token, 10); // Hash del token
     const expiration = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
     // Guardar el token en la base de datos
-    await employeeRepository.savePasswordResetToken(employee.id_employee, token, expiration);
+    await employeeRepository.savePasswordResetToken(employee.id_employee, hashedToken, expiration);
 
     // Enviar el enlace al correo electrónico
     const resetLink = `https://atomicum.com/Holliday/Holiday/contraseña_nueva.html?token=${token}`;
@@ -61,22 +63,39 @@ El equipo de Holiday Inn Express
     await sendEmail(employee.email, subject, text);
 };
 
+const { revokeToken } = require('./tokenRepository'); // Importar la función para revocar tokens
+
 const resetPassword = async (token, newPassword) => {
-    const tokenData = await employeeRepository.getPasswordResetToken(token);
+    const tokenData = await employeeRepository.getPasswordResetToken(token);  // Obtén el token hasheado
     if (!tokenData || tokenData.expiration < new Date()) {
         throw new Error('El token es inválido o ha expirado.');
     }
 
-    // Validar nueva contraseña
-    if (!newPassword || newPassword.length < 8) {
-        throw new Error('La nueva contraseña debe tener al menos 8 caracteres.');
+    // Comparar el token enviado con el hash almacenado
+    const isTokenValid = await bcrypt.compare(token, tokenData.token);
+    if (!isTokenValid) {
+        throw new Error('El token es inválido.');
+    }
+
+    // Validar que la nueva contraseña cumpla con los requisitos
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(newPassword)) {
+        throw new Error(
+            'La nueva contraseña debe tener al menos 8 caracteres, incluyendo una letra mayúscula, una letra minúscula y un número.'
+        );
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    // Actualizar contraseña y eliminar token
+    // Actualizar contraseña
     await employeeRepository.updatePassword(tokenData.id_employee, hashedPassword);
+
+    // Eliminar el token de restablecimiento
     await employeeRepository.deletePasswordResetToken(tokenData.token);
+
+    // Revocar cualquier token activo asociado al usuario
+    const activeToken = jwtHelper.generateToken({ id: tokenData.id_employee }); // Si tienes tokens activos específicos
+    await revokeToken(activeToken);
 
     // Enviar correo de confirmación
     const employee = await employeeRepository.getEmployeeById(tokenData.id_employee);
@@ -92,6 +111,7 @@ El equipo de Holiday Inn Express
 
     await sendEmail(employee.email, subject, text);
 };
+
 
 
 module.exports = { login, requestPasswordReset, resetPassword };

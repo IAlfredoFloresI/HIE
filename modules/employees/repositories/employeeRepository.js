@@ -174,34 +174,6 @@ const getEmployeeByEmail = async (email) => {
     return employee; // Devuelve `undefined` si no encuentra al empleado
 };
 
-// Guardar un token de restablecimiento de contraseña
-const savePasswordResetToken = async (id_employee, token, expiration) => {
-    const database = await db.openDatabase();
-    await database.run(
-        `INSERT INTO password_reset_tokens (id_employee, token, expiration) VALUES (?, ?, ?)`,
-        [id_employee, token, expiration.toISOString()]
-    );
-    await database.close();
-};
-
-// Obtener datos de un token
-const getPasswordResetToken = async (token) => {
-    const database = await db.openDatabase();
-    const tokenData = await database.get(
-        `SELECT * FROM password_reset_tokens WHERE token = ?`,
-        [token]
-    );
-    await database.close();
-    return tokenData;
-};
-
-// Eliminar un token de la base de datos
-const deletePasswordResetToken = async (token) => {
-    const database = await db.openDatabase();
-    await database.run(`DELETE FROM password_reset_tokens WHERE token = ?`, [token]);
-    await database.close();
-};
-
 /**
  * Actualizar el estado del QR de un empleado.
  */
@@ -225,8 +197,5 @@ module.exports = {
     updatePassword,
     checkEmployeeIdExists,
     getEmployeeByEmail,
-    savePasswordResetToken,
-    getPasswordResetToken,
-    deletePasswordResetToken,
     updateQREnabledState,
 };

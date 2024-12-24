@@ -1,4 +1,4 @@
-require('dotenv').config();
+ require('dotenv').config();
 const sqlite3 = require('sqlite3');
 const { open } = require('sqlite');
 const bcrypt = require('bcrypt');
@@ -48,6 +48,24 @@ const employees = [
     { "id_employee": 39, "employeeName": "Mónica Medina", "email": "monica.medina@example.com", "department": "Mantenimiento", "phoneNumber": "", "address": "", "status": "activo", "role": "Employee" }
 ];
 
+//Unos anuncios de prueba nomas
+const advertisements = [
+    {
+        "title": "Promoción especial",
+        "description": "Descuento del 50% en todos los productos",
+        "status": "activo",
+        "issue_date": "2024-12-20",
+        "expiration_date": "2024-12-31"
+    },
+    {
+        "title": "Despedida de Andres",
+        "description": "El dia de hoy le daremos la despedida al Ingeniero Andres, porque nunca llego a la reunión el PUI",
+        "status": "activo",
+        "issue_date": "2024-12-20",
+        "expiration_date": "2024-12-21"
+    }
+]
+
 async function openDatabase() {
     console.log('Abriendo base de datos...'); // Mensaje de inicio
     const db = await open({
@@ -69,34 +87,6 @@ async function initializeDatabase() {
         });
 
         console.log('Conexión establecida con la base de datos.');
-
-        // Crear la tabla de empleados si no existe
-        await db.exec(`
-            CREATE TABLE IF NOT EXISTS employees (
-                id_employee INTEGER PRIMARY KEY,
-                employeeName TEXT NOT NULL,
-                email TEXT NOT NULL UNIQUE, -- El correo debe ser único
-                department TEXT NOT NULL,
-                phoneNumber TEXT,
-                address TEXT,
-                status TEXT CHECK(status IN ('activo', 'baja')) NOT NULL,
-                password TEXT NOT NULL,
-                role TEXT CHECK(role IN ('Admin', 'Employee')) NOT NULL,
-                force_password_reset BOOLEAN DEFAULT false,
-                deleted_at TEXT,
-                qr_enabled BOOLEAN DEFAULT true
-            )
-        `);
-        console.log('Tabla "employees" verificada/existente.');
-
-        // Verificar si la tabla "employees" ya tiene datos
-        const { count: employeeCount } = await db.get('SELECT COUNT(*) AS count FROM employees');
-        if (employeeCount === 0) {
-            console.log('La tabla "employees" está vacía. Insertando datos iniciales...');
-            await insertInitialEmployees(db);
-        } else {
-            console.log(`La tabla "employees" ya contiene ${employeeCount} registros.`);
-        }
 
         // Crear la tabla de tokens de restablecimiento si no existe
         await db.exec(`
@@ -131,6 +121,59 @@ async function initializeDatabase() {
             )
         `);
         console.log('Tabla "checkin_checkout_records" verificada/existente.');
+        
+        //Crear la tabla de Anuncios si no existe
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS advertisements (
+                id_advertisements INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                status TEXT DEFAULT 'activo' CHECK(status IN('activo','inactivo')),
+                issue_date TEXT NOT NULL, --Fecha de asunto en formato YYYY-MM-DD
+                expiration_date TEXT NOT NULL, --Fecha de expiracion en formato YYYY-MM-DD
+                departments TEXT CHECK (departments IN('All','Cocina','Mantenimiento','Seguridad','Almacen'))
+            )
+        `);
+        console.log('Tabla "advertisements" creada pariente (Ya se creo pues)')
+
+        //Crear la tabla de Tokens revocados si no existe    
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS revoked_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                token TEXT NOT NULL UNIQUE, -- Token revocado
+                revocation_date TEXT NOT NULL -- Fecha de revocación
+            )
+        `);
+        console.log('Tabla "revoked_tokens" verificada/existente.');
+        
+
+        // Crear la tabla de empleados si no existe
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS employees (
+                id_employee INTEGER PRIMARY KEY,
+                employeeName TEXT NOT NULL,
+                email TEXT NOT NULL UNIQUE, -- El correo debe ser único
+                department TEXT NOT NULL,
+                phoneNumber TEXT,
+                address TEXT,
+                status TEXT CHECK(status IN ('activo', 'baja')) NOT NULL,
+                password TEXT NOT NULL,
+                role TEXT CHECK(role IN ('Admin', 'Employee')) NOT NULL,
+                force_password_reset BOOLEAN DEFAULT false,
+                deleted_at TEXT,
+                qr_enabled BOOLEAN DEFAULT true
+            )
+        `);
+        console.log('Tabla "employees" verificada/existente.');
+
+        // Verificar si la tabla "employees" ya tiene datos
+        const { count: employeeCount } = await db.get('SELECT COUNT(*) AS count FROM employees');
+        if (employeeCount === 0) {
+            console.log('La tabla "employees" está vacía. Insertando datos iniciales...');
+            await insertInitialEmployees(db);
+        } else {
+            console.log(`La tabla "employees" ya contiene ${employeeCount} registros.`);
+        }
 
         // Verificar si la tabla "checkin_checkout_records" ya tiene datos
         const { count: recordCount } = await db.get('SELECT COUNT(*) AS count FROM checkin_checkout_records');
