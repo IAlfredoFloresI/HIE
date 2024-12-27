@@ -26,9 +26,9 @@ class AdvertisementsService {
   async createAdvertisement(data) {
     const { title, description, status, issue_date, expiration_date, departments } = data;
 
-    const currentDate = new Date();
-    const issueDate = new Date(issue_date);
-    const expirationDate = new Date(expiration_date);
+    const currentDate = new Date().toISOString().split('T')[0];;
+    const issueDate = new Date(issue_date).toISOString().split('T')[0];;
+    const expirationDate = new Date(expiration_date).toISOString().split('T')[0];;
 
     // Validar que las fechas sean correctas
     if (issueDate < currentDate) {
@@ -49,6 +49,7 @@ class AdvertisementsService {
       issue_date,
       expiration_date,
       departments,
+      status: 'activo',
     };
 
     const createdAd = await this.advertisementsRepository.createAdvertisement(data);
@@ -95,7 +96,7 @@ class AdvertisementsService {
   // Método para actualizar automáticamente el estado de los anuncios
   async updateExpiredAds() {
     const currentDate = new Date().toISOString().split('T')[0]; // Fecha actual en formato YYYY-MM-DD
-    await this.advertisementsRepository.actualizarEstadosVencidos(currentDate);
+    await this.advertisementsRepository.updateExpiredAds(currentDate);
   }
 }
 
