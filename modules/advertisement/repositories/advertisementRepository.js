@@ -51,7 +51,7 @@ class AdvertisementsRepository {
       );
       return result;
     } catch (err) {
-      console.error('Error en obtenerCitasPorId:', err);
+      console.error('Error en obteneAnunciosPorId:', err);
       throw err;
     } finally {
       await database.close();
@@ -72,7 +72,7 @@ class AdvertisementsRepository {
       );
       return { id_advertisements: result.lastID,status:'activo', ...nuevoProducto };
     } catch (err) {
-      console.error('Error en crearCitas:', err);
+      console.error('Error en crearAnuncio:', err);
       throw err;
     } finally {
       await database.close();
@@ -93,7 +93,7 @@ class AdvertisementsRepository {
       );
       return result.changes > 0 ? { id_advertisements: id, ...datosActualizados } : null;
     } catch (err) {
-      console.error('Error en actualizarCitas:', err);
+      console.error('Error en actualizarAnuncio:', err);
       throw err;
     } finally {
       await database.close();
@@ -113,7 +113,7 @@ class AdvertisementsRepository {
       );
       return result.changes > 0;
     } catch (err) {
-      console.error('Error en eliminarCitas:', err);
+      console.error('Error en eliminarAnuncio:', err);
       throw err;
     } finally {
       await database.close();
