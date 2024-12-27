@@ -13,7 +13,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/securityBooth/register:
+  * /api/securityBooth/register:
  *   post:
  *     summary: Registrar Check-in o Check-out vía QR
  *     tags: [Security Booth]
@@ -27,10 +27,8 @@ const router = express.Router();
  *               id_employee:
  *                 type: integer
  *                 description: ID del empleado escaneado del QR
- *               action:
- *                 type: string
- *                 enum: [checkin, checkout]
- *                 description: Acción opcional; si no se envía, se determina automáticamente
+ *             example:
+ *               id_employee: 0
  *     responses:
  *       201:
  *         description: Registro creado exitosamente

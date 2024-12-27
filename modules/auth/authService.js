@@ -114,4 +114,4 @@ El equipo de Holiday Inn Express
 
 
 
-module.exports = { login, requestPasswordReset, resetPassword };
+module.exports = { login, requestPasswordReset, resetPassword }; 

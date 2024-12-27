@@ -8,6 +8,119 @@ const AdvertisementsController = require('../controllers/advertisementController
  *   name: Advertisements
  *   description: API for managing advertisements
  */
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Advertisement:
+ *       type: object
+ *       required:
+ *         - title
+ *         - description
+ *         - issue_date
+ *         - expiration_date
+ *         - departments
+ *       properties:
+ *         id_advertisements:
+ *           type: integer
+ *           description: The auto-generated ID of the advertisement
+ *         title:
+ *           type: string
+ *           description: The title of the advertisement
+ *         description:
+ *           type: string
+ *           description: The description of the advertisement
+ *         status:
+ *           type: string
+ *           enum: [activo, inactivo]
+ *           description: The status of the advertisement (default is 'activo')
+ *         issue_date:
+ *           type: string
+ *           format: date
+ *           description: The issue date of the advertisement (must be today or in the future)
+ *         expiration_date:
+ *           type: string
+ *           format: date
+ *           description: The expiration date of the advertisement (must be after the issue date)
+ *         departments:
+ *           type: string
+ *           enum: [All, Cocina, Mantenimiento, Seguridad, Almacen]
+ *           description: The department the advertisement is targeted to
+ *       example:
+ *         id_advertisements: 1
+ *         title: "Summer Sale"
+ *         description: "50% off on all items!"
+ *         status: "activo"
+ *         issue_date: "2024-01-01"
+ *         expiration_date: "2024-01-31"
+ *         departments: "Cocina"
+ *     AdvertisementCreate:
+ *       type: object
+ *       required:
+ *         - title
+ *         - description
+ *         - issue_date
+ *         - expiration_date
+ *         - departments
+ *       properties:
+ *         title:
+ *           type: string
+ *           description: The title of the advertisement
+ *         description:
+ *           type: string
+ *           description: The description of the advertisement
+ *         issue_date:
+ *           type: string
+ *           format: date
+ *           description: The issue date of the advertisement (must be today or in the future)
+ *         expiration_date:
+ *           type: string
+ *           format: date
+ *           description: The expiration date of the advertisement (must be after the issue date)
+ *         departments:
+ *           type: string
+ *           enum: [All, Cocina, Mantenimiento, Seguridad, Almacen]
+ *           description: The department the advertisement is targeted to
+ *       example:
+ *         title: "Winter Sale"
+ *         description: "Up to 70% off!"
+ *         issue_date: "2024-02-01"
+ *         expiration_date: "2024-02-15"
+ *         departments: "All"
+ *     AdvertisementUpdate:
+ *       type: object
+ *       required:
+ *         - title
+ *         - description
+ *         - issue_date
+ *         - expiration_date
+ *         - departments
+ *       properties:
+ *         title:
+ *           type: string
+ *           description: The title of the advertisement
+ *         description:
+ *           type: string
+ *           description: The description of the advertisement
+ *         issue_date:
+ *           type: string
+ *           format: date
+ *           description: The issue date of the advertisement
+ *         expiration_date:
+ *           type: string
+ *           format: date
+ *           description: The expiration date of the advertisement
+ *         departments:
+ *           type: string
+ *           enum: [All, Cocina, Mantenimiento, Seguridad, Almacen]
+ *           description: The department the advertisement is targeted to
+ *       example:
+ *         title: "Spring Sale"
+ *         description: "Exclusive deals!"
+ *         issue_date: "2024-03-01"
+ *         expiration_date: "2024-03-15"
+ *         departments: "Cocina"
+ */
 
 /**
  * @swagger

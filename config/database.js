@@ -53,7 +53,7 @@ const advertisements = [
     {
         "title": "Promoción especial",
         "description": "Descuento del 50% en todos los productos",
-        "status": "activo",
+        "status": "activo", //:O
         "issue_date": "2024-12-20",
         "expiration_date": "2024-12-31"
     },
