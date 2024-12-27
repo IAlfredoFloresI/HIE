@@ -1,7 +1,6 @@
-// auth/authService.js
 const bcrypt = require('bcrypt');
 const jwtHelper = require('./jwtHelper');
-const { savePasswordResetToken, getPasswordResetToken, deletePasswordResetToken } = require('./tokenRepository');
+const { savePasswordResetToken, getPasswordResetToken, deletePasswordResetToken, revokeToken } = require('./tokenRepository');
 const employeeRepository = require('../employees/repositories/employeeRepository');
 const { sendEmail } = require('../../helpers/emailSender');
 const crypto = require('crypto');
@@ -41,8 +40,8 @@ const requestPasswordReset = async (email) => {
     const hashedToken = await bcrypt.hash(token, 10); // Hash del token
     const expiration = new Date(Date.now() + 15 * 60 * 1000); // 15 minutos
 
-    // Guardar el token en la base de datos
-    await employeeRepository.savePasswordResetToken(employee.id_employee, hashedToken, expiration);
+    // Guardar el token en la base de datos usando tokenRepository
+    await savePasswordResetToken(employee.id_employee, hashedToken, expiration);
 
     // Enviar el enlace al correo electrónico
     const resetLink = `https://atomicum.com/Holliday/Holiday/contraseña_nueva.html?token=${token}`;
@@ -63,10 +62,8 @@ El equipo de Holiday Inn Express
     await sendEmail(employee.email, subject, text);
 };
 
-const { revokeToken } = require('./tokenRepository'); // Importar la función para revocar tokens
-
 const resetPassword = async (token, newPassword) => {
-    const tokenData = await employeeRepository.getPasswordResetToken(token);  // Obtén el token hasheado
+    const tokenData = await getPasswordResetToken(token);  // Obtén el token hasheado
     if (!tokenData || tokenData.expiration < new Date()) {
         throw new Error('El token es inválido o ha expirado.');
     }
@@ -91,7 +88,7 @@ const resetPassword = async (token, newPassword) => {
     await employeeRepository.updatePassword(tokenData.id_employee, hashedPassword);
 
     // Eliminar el token de restablecimiento
-    await employeeRepository.deletePasswordResetToken(tokenData.token);
+    await deletePasswordResetToken(tokenData.token);
 
     // Revocar cualquier token activo asociado al usuario
     const activeToken = jwtHelper.generateToken({ id: tokenData.id_employee }); // Si tienes tokens activos específicos
@@ -112,6 +109,4 @@ El equipo de Holiday Inn Express
     await sendEmail(employee.email, subject, text);
 };
 
-
-
-module.exports = { login, requestPasswordReset, resetPassword }; 
+module.exports = { login, requestPasswordReset, resetPassword };
