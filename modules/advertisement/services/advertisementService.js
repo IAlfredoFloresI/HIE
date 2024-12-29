@@ -26,9 +26,9 @@ class AdvertisementsService {
   async createAdvertisement(data) {
     const { title, description, status, issue_date, expiration_date, departments } = data;
 
-    const currentDate = new Date();
-    const issueDate = new Date(issue_date);
-    const expirationDate = new Date(expiration_date);
+    const currentDate = new Date().toISOString().split('T')[0];;
+    const issueDate = new Date(issue_date).toISOString().split('T')[0];;
+    const expirationDate = new Date(expiration_date).toISOString().split('T')[0];;
 
     // Validar que las fechas sean correctas
     if (issueDate < currentDate) {
@@ -49,6 +49,7 @@ class AdvertisementsService {
       issue_date,
       expiration_date,
       departments,
+      status: 'activo',
     };
 
     const createdAd = await this.advertisementsRepository.createAdvertisement(data);

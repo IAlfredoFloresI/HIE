@@ -51,7 +51,7 @@ class AdvertisementsRepository {
       );
       return result;
     } catch (err) {
-      console.error('Error en obtenerCitasPorId:', err);
+      console.error('Error en obteneAnunciosPorId:', err);
       throw err;
     } finally {
       await database.close();
@@ -65,14 +65,14 @@ class AdvertisementsRepository {
     const database = await db.openDatabase();
 
     try {
-      const { title, description, status, issue_date, expiration_date, departments } = nuevoProducto;
+      const { title, description, issue_date, expiration_date, departments } = nuevoProducto;
       const result = await database.run(
-        `INSERT INTO advertisements (title, description, status, issue_date, expiration_date, departments) VALUES (?, ?, ?, ?, ?, ?)`,
-        [title, description, status, issue_date, expiration_date, departments]
+        `INSERT INTO advertisements (title, description, issue_date, expiration_date, departments) VALUES (?, ?, ?, ?, ?)`,
+        [title, description, issue_date, expiration_date, departments]
       );
-      return { id_advertisements: result.lastID, ...nuevoProducto };
+      return { id_advertisements: result.lastID,status:'activo', ...nuevoProducto };
     } catch (err) {
-      console.error('Error en crearCitas:', err);
+      console.error('Error en crearAnuncio:', err);
       throw err;
     } finally {
       await database.close();
@@ -93,7 +93,7 @@ class AdvertisementsRepository {
       );
       return result.changes > 0 ? { id_advertisements: id, ...datosActualizados } : null;
     } catch (err) {
-      console.error('Error en actualizarCitas:', err);
+      console.error('Error en actualizarAnuncio:', err);
       throw err;
     } finally {
       await database.close();
@@ -113,7 +113,7 @@ class AdvertisementsRepository {
       );
       return result.changes > 0;
     } catch (err) {
-      console.error('Error en eliminarCitas:', err);
+      console.error('Error en eliminarAnuncio:', err);
       throw err;
     } finally {
       await database.close();
@@ -149,7 +149,7 @@ class AdvertisementsRepository {
       const result = await database.run(
         `UPDATE advertisements
          SET status = 'inactivo'
-         WHERE expiration_date < ? AND status = 'activo'`,
+         WHERE expiration_date < date(?) AND status = 'activo'`,
         [currentDate]
       );
       console.log(`${result.changes} anuncios actualizados a 'inactivo'.`);

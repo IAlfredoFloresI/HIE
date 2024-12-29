@@ -35,7 +35,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
     // Programar una tarea para actualizar los estados diariamente
     // Ejecutar todos los días a medianoche
-cron.schedule('36 14 * * *', async () => {                                 
+cron.schedule('0 0 * * *', async () => {                                 
     console.log('Actualizando anuncios expirados...');
     try {
       await AdvertisementsService.updateExpiredAds();
