@@ -11,6 +11,7 @@ const cron = require('node-cron');
 const employeeRoutes = require('./modules/employees/routes/employeeRoutes'); // Rutas de empleados
 const authRouter = require('./modules/auth/authRouter'); // Rutas de autenticación
 const securityBoothRoutes = require('./modules/securityBooth/routes/securityBoothRoutes');
+const canteenRoutes = require('./modules/canteen/routes/canteenRoutes');
 const advertisement = require('./modules/advertisement/routes/advertisementRoute'); //Importacion de la Ruta de Anuncios
 const AdvertisementsService = require('./modules/advertisement/services/advertisementService');//Importo el servicio de Anuncios, que se usará junto con cron, para cambiar Status
 
@@ -34,7 +35,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
     // Programar una tarea para actualizar los estados diariamente
     // Ejecutar todos los días a medianoche
-cron.schedule('0 0 * * *', async () => {                                 
+cron.schedule('36 14 * * *', async () => {                                 
     console.log('Actualizando anuncios expirados...');
     try {
       await AdvertisementsService.updateExpiredAds();
@@ -90,6 +91,7 @@ const swaggerOptions = {
         './modules/employees/routes/*.js',
         './modules/auth/authRouter.js',
         './modules/securityBooth/routes/*.js', // Asegúrate de incluir las rutas de Security Booth
+        './modules/canteen/routes/*.js',
         './modules/advertisement/routes/*.js'
     ], // Rutas a los archivos de Swagger
 };
@@ -102,6 +104,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use('/auth', authRouter); // Rutas de autenticación
 app.use('/api/employees', employeeRoutes); // Rutas de empleados
 app.use('/api/securityBooth', securityBoothRoutes); // Rutas de Security Booth
+app.use('/api/canteen', canteenRoutes); // Rutas de Canteen
 app.use('/api',advertisement) //Ruta de los anuncios
 
 // 6. Manejo de rutas no encontradas

@@ -53,7 +53,7 @@ const advertisements = [
     {
         "title": "Promoción especial",
         "description": "Descuento del 50% en todos los productos",
-        "status": "activo",
+        "status": "activo", //:O
         "issue_date": "2024-12-20",
         "expiration_date": "2024-12-31"
     },
@@ -114,9 +114,12 @@ async function initializeDatabase() {
                 id_record INTEGER PRIMARY KEY AUTOINCREMENT,
                 id_employee INTEGER NOT NULL,
                 action TEXT CHECK(action IN ('checkin', 'checkout')) NOT NULL,
-                record_date TEXT NOT NULL, -- Fecha en formato YYYY-MM-DD
-                record_time TEXT NOT NULL, -- Hora en formato HH:MM:SS
-                UNIQUE(id_employee, record_date, record_time, action), -- Prevenir duplicados
+                record_date TEXT DEFAULT (CURRENT_DATE) NOT NULL,
+                -- Fecha predeterminada en formato YYYY-MM-DD
+                record_time TEXT DEFAULT (CURRENT_TIME) NOT NULL,
+                -- Hora predeterminada en formato HH:MM:SS
+                UNIQUE(id_employee, record_date, record_time, action),
+                -- Prevenir duplicados
                 FOREIGN KEY (id_employee) REFERENCES employees(id_employee)
             )
         `);

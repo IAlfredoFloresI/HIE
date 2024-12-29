@@ -1,25 +1,51 @@
 const securityBoothService = require('../services/securityBoothService');
+const canteenService = require('../../canteen/services/canteenService');
+
 
 // Registrar una acción (Check-in o Check-out)
 const registerAction = async (req, res) => {
     try {
-        console.log('Datos recibidos en el controlador:', req.body);
         const { id_employee } = req.body;
+        const { action } = await securityBoothService.registerAction({ id_employee }); // Extraer la acción
 
-        if (!id_employee) {
-            console.log('Error: Faltan campos obligatorios.');
-            return res.status(400).json({ message: 'Falta el campo obligatorio id_employee.' });
+        if (action === 'checkout') {
+            console.log('Sincronizando checkout en canteen...');
+            await canteenService.synchronizeCanteenCheckout(id_employee);
+            res.status(200).json({
+                success: true,
+                message: `Acción '${action}' registrada correctamente en la caseta de seguridad y en el comedor.`,
+            });
+        } else {
+            res.status(200).json({
+                success: true,
+                message: `Acción '${action}' registrada correctamente en caseta de seguridad.`,
+            });
         }
-
-        console.log('Llamando a securityBoothService.registerAction...');
-        const record = await securityBoothService.registerAction({ id_employee });
-        console.log('Acción registrada exitosamente:', record);
-        res.status(201).json(record);
     } catch (error) {
-        console.error('Error en el controlador:', error.message);
-        res.status(400).json({ message: `Error al registrar acción: ${error.message}` });
+        console.error('Error al registrar acción en securityBooth:', error);
+        res.status(500).json({ success: false, error: error.message });
     }
 };
+
+const registerSecurityCheckout = async (userId, timestamp) => {
+    try {
+        // Verificar si el usuario tiene un check-in activo en el comedor
+        const canteenStatus = await canteenService.getRecordsByEmployee(userId);
+
+        if (canteenStatus && canteenStatus.some(record => record.action === 'checkin')) {
+            // Sincronizar el check-out en el comedor si tiene un check-in
+            await canteenService.synchronizeCanteenCheckout(userId);
+        }
+
+        // Registrar el checkout de la caseta de seguridad
+        await securityBoothService.registerAction(userId, "checkout", timestamp, "securityBooth");
+    } catch (error) {
+        console.error('Error al registrar el checkout:', error.message);
+        throw new Error('Error al registrar el checkout en securityBooth.');
+    }
+};
+
+
 
 // Endpoint para obtener los registros con filtros
 const getRecords = async (req, res) => {
@@ -55,6 +81,7 @@ const getEmployeeHistory = async (req, res) => {
 
 module.exports = {
     registerAction,
+    registerSecurityCheckout,
     getRecords,
     getEmployeesCheckedIn,
     getEmployeeHistory,

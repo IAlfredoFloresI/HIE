@@ -40,7 +40,7 @@ const addEmployee = async (employee) => {
     try {
         // Validar que los campos obligatorios estén presentes
         if (!employee.employeeName || !employee.email || !employee.department) {
-            throw new Error("Error de validación: Faltan campos obligatorios (employeeName, email, department).");
+            throw new Error("Error de validación: Faltan ligatorios (employeeName, email, department).");
         }
 
          // Generar una contraseña aleatoria

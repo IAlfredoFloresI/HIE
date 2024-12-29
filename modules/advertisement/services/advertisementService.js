@@ -95,7 +95,7 @@ class AdvertisementsService {
   // Método para actualizar automáticamente el estado de los anuncios
   async updateExpiredAds() {
     const currentDate = new Date().toISOString().split('T')[0]; // Fecha actual en formato YYYY-MM-DD
-    await this.advertisementsRepository.actualizarEstadosVencidos(currentDate);
+    await this.advertisementsRepository.updateExpiredAds(currentDate);
   }
 }
 

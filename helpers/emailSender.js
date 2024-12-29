@@ -1,11 +1,49 @@
 const nodemailer = require('nodemailer');
 
 /**
- * Enviar un correo genérico.
- * @param {string} to - Dirección de correo del destinatario.
- * @param {string} subject - Asunto del correo.
- * @param {string} text - Contenido del correo en texto plano.
+ * Enviar correo de notificación de check-in o check-out.
+ * @param {string} email - Dirección de correo del empleado.
+ * @param {string} name - Nombre del empleado.
+ * @param {string} action - Acción realizada (Check-in o Check-out).
+ * @param {string} recordDate - Fecha del registro.
+ * @param {string} recordTime - Hora del registro.
+ * @param {string} location - Ubicación de la acción (securityBooth o canteen).
  */
+const sendCheckInOutNotification = async (email, name, action, recordDate, recordTime, location) => {
+    const subject = `Notificación de ${action} - Holiday Inn Express`;
+
+    // Determinar el mensaje dependiendo de la ubicación de la acción
+    let locationMessage = '';
+    if (location === 'security') {
+        locationMessage = `Te notificamos que tu ${action} en la caseta de seguridad ha sido registrado exitosamente en nuestro sistema.`;
+    } else if (location === 'canteen') {
+        locationMessage = `Te notificamos que tu ${action} en el comedor ha sido registrado exitosamente en nuestro sistema.`;
+    }
+
+    const text = `
+        Estimado/a ${name},
+
+            ${locationMessage}
+
+            Detalles del registro:
+                - Acción: ${action}
+                - Fecha: ${recordDate}
+                - Hora: ${recordTime}
+
+            Por favor, no respondas a este correo, ya que es generado automáticamente.  
+            Si tienes alguna duda o necesitas asistencia, no dudes en contactarnos en nuestra recepción o a través de nuestro equipo de soporte.
+
+            Gracias por tu dedicación y esfuerzo.
+
+            Atentamente,  
+            El equipo de Recursos Humanos  
+            Holiday Inn Express
+    `;
+
+    await sendEmail(email, subject, text);
+};
+
+
 const sendEmail = async (to, subject, text) => {
     try {
         const transporter = nodemailer.createTransport({
@@ -31,6 +69,7 @@ const sendEmail = async (to, subject, text) => {
         throw new Error('No se pudo enviar el correo. Intente nuevamente más tarde.');
     }
 };
+
 
 /**
  * Enviar correo de confirmación de cambio de contraseña.
@@ -58,4 +97,4 @@ Holiday Inn Express
     await sendEmail(email, subject, text);
 };
 
-module.exports = { sendEmail, sendPasswordChangeConfirmation };
+module.exports = { sendEmail, sendPasswordChangeConfirmation, sendCheckInOutNotification};

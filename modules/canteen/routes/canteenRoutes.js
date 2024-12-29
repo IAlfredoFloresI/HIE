@@ -1,5 +1,5 @@
 const express = require('express');
-const securityBoothController = require('../controllers/securityBoothController');
+const canteenController = require('../controllers/canteenController');
 const authenticate = require('../../../middlewares/authenticate');
 const { authorize } = require('../../../middlewares/authorize');
 const router = express.Router();
@@ -7,16 +7,16 @@ const router = express.Router();
 /**
  * @swagger
  * tags:
- *   name: Security Booth
- *   description: Endpoints para Check-in y Check-out
+ *   name: Canteen
+ *   description: Endpoints para Check-in y Check-out en el comedor
  */
 
 /**
  * @swagger
-  * /api/securityBooth/register:
+ * /api/canteen/register:
  *   post:
- *     summary: Registrar Check-in o Check-out vía QR
- *     tags: [Security Booth]
+ *     summary: Registrar Check-in o Check-out en el comedor vía QR
+ *     tags: [Canteen]
  *     requestBody:
  *       required: true
  *       content:
@@ -45,14 +45,14 @@ const router = express.Router();
  *       500:
  *         description: Error interno
  */
-router.post('/register', securityBoothController.registerAction);
+router.post('/register', canteenController.registerAction);
 
 /**
  * @swagger
- * /api/securityBooth/records:
+ * /api/canteen/records:
  *   get:
- *     summary: Obtener registros de Check-in/Check-out con filtros (Admin Only)
- *     tags: [Security Booth]
+ *     summary: Obtener registros de Check-in/Check-out en el comedor con filtros (Admin Only)
+ *     tags: [Canteen]
  *     parameters:
  *       - in: query
  *         name: id_employee
@@ -101,28 +101,28 @@ router.post('/register', securityBoothController.registerAction);
  *       500:
  *         description: Error interno del servidor
  */
-router.get('/records', authenticate, authorize(['Admin']), securityBoothController.getRecords);
+router.get('/records', authenticate, authorize(['Admin']), canteenController.getRecords);
 
 /**
  * @swagger
- * /api/securityBooth/employees-checked-in:
+ * /api/canteen/employees-checked-in:
  *   get:
- *     summary: Obtener empleados actualmente en el edificio (Admin Only)
- *     tags: [Security Booth]
+ *     summary: Obtener empleados actualmente en el comedor (Admin Only)
+ *     tags: [Canteen]
  *     responses:
  *       200:
  *         description: Lista de empleados obtenida exitosamente
  *       500:
  *         description: Error interno
  */
-router.get('/employees-checked-in', authenticate, authorize(['Admin']), securityBoothController.getEmployeesCheckedIn);
+router.get('/employees-checked-in', authenticate, authorize(['Admin']), canteenController.getEmployeesCheckedIn);
 
 /**
  * @swagger
- * /api/securityBooth/history/{id_employee}:
+ * /api/canteen/history/{id_employee}:
  *   get:
- *     summary: Obtener historial de un empleado
- *     tags: [Security Booth]
+ *     summary: Obtener historial de un empleado en el comedor
+ *     tags: [Canteen]
  *     parameters:
  *       - name: id_employee
  *         in: path
@@ -135,6 +135,6 @@ router.get('/employees-checked-in', authenticate, authorize(['Admin']), security
  *       500:
  *         description: Error interno
  */
-router.get('/history/:id_employee', authenticate, authorize(['Employee', 'Admin']), securityBoothController.getEmployeeHistory);
+router.get('/history/:id_employee', authenticate, authorize(['Employee', 'Admin']), canteenController.getEmployeeHistory);
 
 module.exports = router;
